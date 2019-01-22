@@ -1,10 +1,8 @@
 library(rvest)
 library(magrittr)
 
-periodos <- c("2000-2005", "2005-2010", "2010-2015", "2015-2020")
+periodos <- c("2000-2005", "2005-2010","2010-2015","2015-2020")
 tipo <- c("leyes", "decretos")
-meses <- sprintf("%02d", 1:12)
-anos <- 2000:2020
 urlbase <- "https://www.presidencia.gub.uy"
 
 urlpertipo <- paste(urlbase, "normativa", periodos, sep = "/") %>%
@@ -25,6 +23,8 @@ norm <- sapply(ext, function(x) {
   url <- paste0(urlbase, x)
   web <- read_html(url)
   nodes <- html_nodes(web, "#desarrollo a")
-  text <- html_text(nodes)
-  
+  #text <- html_text(nodes) %>% trimws()
+  cant <- as.numeric(length(nodes))
+  list(url,cant)
   })
+table <- cbind(norm[1,],norm[2,])
