@@ -24,10 +24,11 @@ unlist()
 norm <- sapply(ext, function(x) {tryCatch({
   url <- paste0(urlbase, x)
   web <- read_html(url)
+  type <- str_extract(url,"/[a-z]{5,8}/") %>% {gsub("/","",.)} %>% str_to_title()
   text <- html_nodes(web, "#desarrollo a") %>% html_text() %>% trimws()
   cant <- length(text) %>% as.numeric()
   date <- str_extract(url,"-[0-9]+-[0-9]+") %>% substring(2) %>% parse_date_time(orders="mY") %>% as.Date()
-  list(date,url,cant,text)},
-  error=function(e) c(date,url,NA,NA))
+  list(url,date,type,cant,text)},
+  error=function(e) c(url,date,type,NA,NA))
   })
-datalist <- list(norm[1,],norm[2,],norm[3,],norm[4,])
+datalist <- list(norm[1,],norm[2,],norm[3,],norm[4,],norm[5,])
