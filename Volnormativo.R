@@ -24,9 +24,8 @@ unlist()
 norm <- sapply(ext, function(x) {tryCatch({
   url <- paste0(urlbase, x)
   web <- read_html(url)
-  nodes <- html_nodes(web, "#desarrollo a")
-  text <- html_text(nodes) %>% trimws()
-  cant <- length(nodes) %>% as.numeric()
+  text <- html_nodes(web, "#desarrollo a") %>% html_text() %>% trimws()
+  cant <- length(text) %>% as.numeric()
   date <- str_extract(url,"-[0-9]+-[0-9]+") %>% substring(2) %>% parse_date_time(orders="mY") %>% as.Date()
   list(date,url,cant,text)},
   error=function(e) c(date,url,NA,NA))
