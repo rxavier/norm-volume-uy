@@ -26,7 +26,7 @@ norm <- sapply(ext, function(x) {tryCatch({
   web <- read_html(url)
   nodes <- html_nodes(web, "#desarrollo a")
   text <- html_text(nodes) %>% trimws()
-  cant <- as.numeric(length(nodes))
+  cant <- length(nodes) %>% as.numeric()
   date <- str_extract(url,"-[0-9]+-[0-9]+") %>% substring(2) %>% parse_date_time(orders="mY") %>% as.Date()
   list(date,url,cant,text)},
   error=function(e) c(date,url,NA,NA))
