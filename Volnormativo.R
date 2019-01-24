@@ -30,4 +30,4 @@ norm <- sapply(ext, function(x) {tryCatch({
   list(date,url,cant,text)},
   error=function(e) c(date,url,NA,NA))
   })
-datalist <- list(norm[1,],norm[2,],norm[3,])
+datalist <- list(norm[1,],norm[2,],norm[3,],norm[4,])
