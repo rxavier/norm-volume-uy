@@ -26,7 +26,6 @@ norm <- sapply(ext, function(x) {tryCatch({
   text <- html_text(nodes) %>% trimws()
   cant <- as.numeric(length(nodes))
   list(url,cant,text)},
-  error=function(e) {NA
-    print(paste("Error en la URL",url))})
+  error=function(e) c(url,NA,NA))
   })
 datalist <- list(norm[1,],norm[2,],norm[3,])
