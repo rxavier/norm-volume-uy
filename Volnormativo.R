@@ -1,7 +1,7 @@
 library(rvest)
 library(magrittr)
 
-periodos <- c("2000-2005", "2005-2010","2010-2015","2015-2020")
+periodos <- c("2010-2015")
 tipo <- c("leyes", "decretos")
 urlbase <- "https://www.presidencia.gub.uy"
 
@@ -19,12 +19,14 @@ ext <- sapply(urlpertipo, function (x) {
 }) %>%
 unlist()
 
-norm <- sapply(ext, function(x) {
+norm <- sapply(ext, function(x) {tryCatch({
   url <- paste0(urlbase, x)
   web <- read_html(url)
   nodes <- html_nodes(web, "#desarrollo a")
   text <- html_text(nodes) %>% trimws()
   cant <- as.numeric(length(nodes))
-  list(url,cant,text)
+  list(url,cant,text)},
+  error=function(e) {NA
+    print(paste("Error en la URL",url))})
   })
 datalist <- list(norm[1,],norm[2,],norm[3,])
