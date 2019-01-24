@@ -23,7 +23,7 @@ norm <- sapply(ext, function(x) {tryCatch({
   url <- paste0(urlbase, x)
   web <- read_html(url)
   nodes <- html_nodes(web, "#desarrollo a")
-  text <- html_text(nodes) %>% trimws()
+  text <- html_text(nodes) %>% trimws() %>% {gsub("\n          "," ",.)}
   cant <- as.numeric(length(nodes))
   list(url,cant,text)},
   error=function(e) c(url,NA,NA))
