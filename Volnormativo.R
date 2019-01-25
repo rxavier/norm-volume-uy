@@ -3,7 +3,7 @@ library(magrittr)
 library(tidyverse)
 library(RcppCCTZ)
 
-periodos <- c("2005-2010")
+periodos <- c("2000-2005","2005-2010","2010-2015","2015-2020")
 tipo <- c("leyes", "decretos")
 urlbase <- "https://www.presidencia.gub.uy"
 
