@@ -26,8 +26,8 @@ ext <- ext[grep("[a-z0-9-]{12,16}",ext)]
 
 norm <- sapply(ext, function(x) {tryCatch({
   url <- paste0(urlbase, x)
-  web <- read_html(url)
   type <- str_extract(url,"/[a-z]{5,8}/") %>% {gsub("/","",.)} %>% str_to_title()
+  web <- read_html(url)
   text <- html_nodes(web, "#desarrollo a") %>% html_text() %>% trimws() %>% {gsub("\n          "," ",.)}
   cant <- length(text) %>% as.numeric()
   date <- str_extract(url,"-[0-9]+-[0-9]+") %>% substring(2) %>% parseDatetime(fmt="%m-%Y") %>% as.Date()
