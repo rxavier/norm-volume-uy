@@ -22,6 +22,7 @@ ext <- sapply(urlpertipo, function (x) {
   html_attr("href") %>% trimws()
 }) %>%
 unlist()
+ext <- ext[grep("[a-z0-9-]{12,16}",ext)]
 
 norm <- sapply(ext, function(x) {tryCatch({
   url <- paste0(urlbase, x)
