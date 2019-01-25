@@ -1,7 +1,7 @@
 library(rvest)
 library(magrittr)
 library(tidyverse)
-library(lubridate)
+library(RcppCCTZ)
 
 periodos <- c("2005-2010")
 tipo <- c("leyes", "decretos")
@@ -30,7 +30,7 @@ norm <- sapply(ext, function(x) {tryCatch({
   type <- str_extract(url,"/[a-z]{5,8}/") %>% {gsub("/","",.)} %>% str_to_title()
   text <- html_nodes(web, "#desarrollo a") %>% html_text() %>% trimws() %>% {gsub("\n          "," ",.)}
   cant <- length(text) %>% as.numeric()
-  date <- str_extract(url,"-[0-9]+-[0-9]+") %>% substring(2) %>% parse_date_time(orders="mY") %>% as.Date()
+  date <- str_extract(url,"-[0-9]+-[0-9]+") %>% substring(2) %>% parseDatetime(fmt="%m-%Y") %>% as.Date()
   list(url,date,type,cant,text)},
   error=function(e) c(url,date,type,NA,NA))
   })
