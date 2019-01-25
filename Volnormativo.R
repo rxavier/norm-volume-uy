@@ -10,7 +10,9 @@ urlbase <- "https://www.presidencia.gub.uy"
 urlpertipo <- paste(urlbase, "normativa", periodos, sep = "/") %>%
   sapply(function(x) {
     url <- paste(x, tipo, sep = "/")
-    list(url)
+    urlfix <- ifelse(str_extract(url,"[0-9]+-[0-9]+")=="2005-2010",
+                     paste(url,"inicio",sep="/"), url) %>%
+    list()
   }) %>%
 unlist()
 
