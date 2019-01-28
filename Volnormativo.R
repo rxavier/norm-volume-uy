@@ -35,3 +35,4 @@ norm <- sapply(ext, function(x) {tryCatch({
   error=function(e) c(url,date,type,NA,NA))
   })
 datalist <- list(norm[1,],norm[2,],norm[3,],norm[4,],norm[5,])
+datalist[[2]] <- parse_date_time(norm2[2,],orders=c("mY","my")) %>% as.Date()
