@@ -30,9 +30,13 @@ norm <- sapply(ext, function(x) {tryCatch({
   web <- read_html(url)
   text <- html_nodes(web, "#desarrollo a") %>% html_text() %>% trimws() %>% {gsub("\n          "," ",.)}
   cant <- length(text) %>% as.numeric()
-  date <- str_extract(url,"-[0-9]+-[0-9]+") %>% substring(2)
+  date <- str_extract(url,"-[0-9]+-[0-9]{4}") %>% substring(2)
   list(url,date,type,cant,text)},
   error=function(e) c(url,date,type,NA,NA))
   })
-datalist <- list(norm[1,],norm[2,],norm[3,],norm[4,],norm[5,])
-datalist[[2]] <- parse_date_time(norm2[2,],orders=c("mY","my")) %>% as.Date()
+df<-cbind(norm[1,],norm[2,],norm[3,],norm[4,]) %>% data.frame()
+colnames(df) <- c("URL","Date","Type","Count")
+df$Date <- parse_date_time(df$Date,orders=c("mY","my")) %>% as.Date()
+df$Count <- as.numeric(df$Count)
+df$URL <- as.character(df$URL)
+df$Type <- as.character(df$Type)
