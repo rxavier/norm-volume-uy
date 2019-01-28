@@ -1,7 +1,7 @@
 library(rvest)
 library(magrittr)
 library(tidyverse)
-library(RcppCCTZ)
+library(lubridate)
 
 periodos <- c("2000-2005","2005-2010","2010-2015","2015-2020")
 tipo <- c("leyes", "decretos")
@@ -30,8 +30,9 @@ norm <- sapply(ext, function(x) {tryCatch({
   web <- read_html(url)
   text <- html_nodes(web, "#desarrollo a") %>% html_text() %>% trimws() %>% {gsub("\n          "," ",.)}
   cant <- length(text) %>% as.numeric()
-  date <- str_extract(url,"-[0-9]+-[0-9]+") %>% substring(2) %>% parseDatetime(fmt="%m-%Y") %>% as.Date()
+  date <- str_extract(url,"-[0-9]+-[0-9]+") %>% substring(2)
   list(url,date,type,cant,text)},
   error=function(e) c(url,date,type,NA,NA))
   })
 datalist <- list(norm[1,],norm[2,],norm[3,],norm[4,],norm[5,])
+datalist[[2]] <- parse_date_time(norm2[2,],orders=c("mY","my")) %>% as.Date()
