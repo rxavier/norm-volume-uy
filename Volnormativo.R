@@ -36,3 +36,4 @@ norm <- sapply(ext, function(x) {tryCatch({
   })
 df<-cbind(norm[1,],norm[2,],norm[3,],norm[4,]) %>% data.frame()
 df[,2] <- parse_date_time(df[,2],orders=c("mY","my")) %>% as.Date()
+colnames(df) <- c("URL","Date","Type","Count")
