@@ -2,6 +2,7 @@ library(rvest)
 library(magrittr)
 library(tidyverse)
 library(lubridate)
+library(beepr)
 
 # Set legislature periods, norm type (law or decree) and the base url
 periods <- c("2000-2005","2005-2010","2010-2015","2015-2020")
@@ -49,3 +50,4 @@ df$Date <- parse_date_time(df$Date,orders=c("mY","my")) %>% as.Date()
 df$Count <- as.numeric(df$Count)
 df$URL <- as.character(df$URL)
 df$Type <- as.character(df$Type)
+beep()
