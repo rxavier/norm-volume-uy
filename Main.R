@@ -49,3 +49,5 @@ df$Type <- str_extract(df$URL,"/[a-z]{5,8}/") %>% {gsub("/","",.)} %>% str_to_ti
 df$Count <- as.numeric(df$Count)
 df$URL <- as.character(df$URL)
 beep()
+
+plot=ggplot(df, aes(x=Date,y=Count,colour=Type)) +     geom_line() +     xlab("")
