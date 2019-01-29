@@ -4,7 +4,7 @@ library(tidyverse)
 library(lubridate)
 
 # Set legislature periods, norm type (law or decree) and the base url
-periods <- c("2015-2020")
+periods <- c("2000-2005","2005-2010","2010-2015","2015-2020")
 normtype <- c("leyes", "decretos")
 baseurl <- "https://www.presidencia.gub.uy"
 
