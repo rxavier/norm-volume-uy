@@ -3,20 +3,20 @@ library(magrittr)
 library(tidyverse)
 library(lubridate)
 
-periodos <- c("2000-2005","2005-2010","2010-2015","2015-2020")
-tipo <- c("leyes", "decretos")
-urlbase <- "https://www.presidencia.gub.uy"
+periods <- c("2000-2005","2005-2010","2010-2015","2015-2020")
+normtype <- c("leyes", "decretos")
+baseurl <- "https://www.presidencia.gub.uy"
 
-urlpertipo <- paste(urlbase, "normativa", periodos, sep = "/") %>%
+urlpertype <- paste(baseurl, "normativa", periods, sep = "/") %>%
   sapply(function(x) {
-    url <- paste(x, tipo, sep = "/")
+    url <- paste(x, normtype, sep = "/")
     urlfix <- ifelse(str_extract(url,"[0-9]+-[0-9]+")=="2005-2010",
                      paste(url,"inicio",sep="/"), url) %>%
     list()
   }) %>%
 unlist()
 
-ext <- sapply(urlpertipo, function (x) {
+ext <- sapply(urlpertype, function (x) {
   read_html(x) %>%
   html_nodes("#desarrollo a") %>%
   html_attr("href") %>% trimws()
@@ -25,7 +25,7 @@ unlist()
 ext <- ext[grep("[a-z0-9-]{12,16}",ext)]
 
 norm <- sapply(ext, function(x) {tryCatch({
-  url <- paste0(urlbase, x)
+  url <- paste0(baseurl, x)
   type <- str_extract(url,"/[a-z]{5,8}/") %>% {gsub("/","",.)} %>% str_to_title()
   web <- read_html(url)
   text <- html_nodes(web, "#desarrollo a") %>% html_text() %>% trimws() %>% {gsub("\n          "," ",.)}
