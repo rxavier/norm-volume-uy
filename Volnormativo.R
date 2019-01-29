@@ -12,16 +12,16 @@ urlpertype <- paste(baseurl, "normativa", periods, sep = "/") %>%
     url <- paste(x, normtype, sep = "/")
     urlfix <- ifelse(str_extract(url,"[0-9]+-[0-9]+")=="2005-2010",
                      paste(url,"inicio",sep="/"), url) %>%
-    list()
+      list()
   }) %>%
-unlist()
+  unlist()
 
 ext <- sapply(urlpertype, function (x) {
   read_html(x) %>%
-  html_nodes("#desarrollo a") %>%
-  html_attr("href") %>% trimws()
+    html_nodes("#desarrollo a") %>%
+    html_attr("href") %>% trimws()
 }) %>%
-unlist()
+  unlist()
 ext <- ext[grep("[a-z0-9-]{12,16}",ext)]
 
 norm <- sapply(ext, function(x) {tryCatch({
@@ -33,7 +33,7 @@ norm <- sapply(ext, function(x) {tryCatch({
   date <- str_extract(url,"-[0-9]+-[0-9]{4}") %>% substring(2)
   list(url,date,type,cant,text)},
   error=function(e) c(url,date,type,NA,NA))
-  })
+})
 df<-cbind(norm[1,],norm[2,],norm[3,],norm[4,]) %>% data.frame()
 colnames(df) <- c("URL","Date","Type","Count")
 df$Date <- parse_date_time(df$Date,orders=c("mY","my")) %>% as.Date()
