@@ -37,7 +37,7 @@ norm <- sapply(ext, function(x) {tryCatch({
   web <- read_html(url)
   text <- html_nodes(web, "#desarrollo a") %>% html_text() %>% trimws() %>% {gsub("\n          "," ",.)}
   cant <- length(text) %>% as.numeric()
-  date <- str_extract(url,"-[0-9]+-[0-9]{4}") %>% substring(2)
+  date <- str_extract(url,"-[0-9]+-[0-9]{2,4}") %>% substring(2)
   list(url,date,type,cant,text)},
   error=function(e) c(url,date,type,NA,NA))
 })
