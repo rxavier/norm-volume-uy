@@ -51,3 +51,5 @@ df$URL <- as.character(df$URL)
 beep()
 
 plot=ggplot(df, aes(x=Date,y=Count,colour=Type)) +     geom_line() +     xlab("")
+
+save.image("./Data.RData")
