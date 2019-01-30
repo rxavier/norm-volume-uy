@@ -35,7 +35,7 @@ ext <- ext[grep("[a-z0-9-]{12,16}",ext)]
 norm <- sapply(ext, function(x) {tryCatch({
   url <- paste0(baseurl, x)
   web <- read_html(url)
-  text <- html_nodes(web, "#desarrollo a") %>% html_text() %>% trimws() %>% {gsub("\n          "," ",.)}
+  text <- html_nodes(web, "#desarrollo a") %>% html_text() %>% trimws() %>% str_replace_all("\\s+"," ")
   cant <- length(text) %>% as.numeric()
   list(url,cant,text)},
   error=function(e) c(url,NA,NA))
