@@ -1,5 +1,3 @@
-load("./Data.RData")
-
 ## Separate every string into words, remove some punctuation and years, calculate frequency
 wordfreq <- str_split(unlist(norm[3,])," ") %>% 
   {str_remove_all(unlist(.),"\\.(?![A-Z])|[\",]|[0-9]{4}")} %>%
@@ -23,5 +21,3 @@ exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUST
              "ANEXO","DESIGNA", "DESIGNACIÓN","ESCUELA","PARTIDAS","COMISIÓN", "MERCOSUR",
              "MERCADO COMÚN","EMISIÓN","SALARIO MÍNIMO NACIONAL",
              "MONTO MÍNIMO DE LAS JUBILACIONES","INTERÉS NACIONAL", "COMPLEMENTACIÓN","COOPERACIÓN")
-
-save.image("./Data.RData")
