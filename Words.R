@@ -1,6 +1,8 @@
 load("./Data.RData")
 
-wordfreq <- str_split(unlist(norm[3,])," ") %>% {table(unlist(.))}
+wordfreq <- str_split(unlist(norm[3,])," ") %>% 
+  {str_remove_all(unlist(.),"\\.(?![A-Z])|[\",]|[0-9]{4}")} %>%
+  {table(unlist(.))}
 wdf <- names(wordfreq) %>% str_remove_all("\\s+") %>%
   cbind.data.frame(as.integer(wordfreq),stringsAsFactors=F) 
 colnames(wdf) <- c("A","B")
