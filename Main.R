@@ -1,4 +1,4 @@
-packages <-c("rvest","magrittr","tidyverse","lubridate","beepr")
+packages <-c("rvest","magrittr","tidyverse","lubridate","beepr","reshape2")
 invisible(lapply(packages, library, character.only = TRUE))
 
 # Set legislature periods, norm type (law or decree) and the base url
@@ -47,8 +47,6 @@ df$Count <- as.numeric(df$Count)
 df$URL <- as.character(df$URL)
 beep()
 
-plot1=ggplot(df, aes(x=Date,y=Count,colour=Type)) +     geom_line() +     xlab("")
-
 ## Manually pick words which will be excluded from the norm count
 exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUSTABLE",
              "unidad reajustable","U.R.","UR","U.R.A.","URA","Se fija","Se actualiza","SUSCRITO",
@@ -63,4 +61,9 @@ prune <- sapply(norm[3,],function(x) {
   list(cant,text)})
 df$CountPrune <- prune[1,] %>% as.numeric()
 
-plot2=ggplot(df, aes(x=Date,y=CountPrune,colour=Type)) +     geom_line() +     xlab("")
+dfmelt <- melt(df,id=c("Date","Type","URL"))
+datdec <- subset(dfmelt,Type %in% "Decretos")
+datlaw <- subset(dfmelt,Type %in% "Leyes")
+
+plot1=ggplot(datdec, aes(x=Date,y=value,colour=variable)) +     geom_line() +     xlab("")
+plot2=ggplot(datlaw, aes(x=Date,y=value,colour=variable)) +     geom_line() +     xlab("")
