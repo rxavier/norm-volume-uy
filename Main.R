@@ -60,4 +60,8 @@ exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUST
              "MONTO MÍNIMO DE LAS JUBILACIONES","INTERÉS NACIONAL",
              "COMPLEMENTACIÓN","COOPERACIÓN") %>% {paste0("\\b",.,"\\b",collapse="|")}
 
-prune <- sapply(norm[3,],function(x) unlist(x) %>% {.[!str_detect(.,exclude)]})
+prune <- sapply(norm[3,],function(x) {
+  text <- unlist(x) %>% {.[!str_detect(.,exclude)]}
+  cant <- length(text) %>% as.numeric()
+  list(cant,text)})
+
