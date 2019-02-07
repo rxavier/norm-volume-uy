@@ -52,4 +52,10 @@ beep()
 
 plot=ggplot(df, aes(x=Date,y=Count,colour=Type)) +     geom_line() +     xlab("")
 
-source('./Words.R')
+## Manually pick words which will be excluded from the norm count
+exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUSTABLE",
+             "unidad reajustable","U.R.","UR","U.R.A.","URA","Se fija","Se actualiza","SUSCRITO",
+             "ANEXO","DESIGNA", "DESIGNACIÓN","ESCUELA","PARTIDAS","COMISIÓN", "MERCOSUR",
+             "MERCADO COMÚN","EMISIÓN","SALARIO MÍNIMO NACIONAL",
+             "MONTO MÍNIMO DE LAS JUBILACIONES","INTERÉS NACIONAL", "COMPLEMENTACIÓN","COOPERACIÓN")
+
