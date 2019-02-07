@@ -1,8 +1,5 @@
-library(rvest)
-library(magrittr)
-library(tidyverse)
-library(lubridate)
-library(beepr)
+packages <-c("rvest","magrittr","tidyverse","lubridate","beepr")
+invisible(lapply(packages, library, character.only = TRUE))
 
 # Set legislature periods, norm type (law or decree) and the base url
 periods <- c("2000-2005","2005-2010","2010-2015","2015-2020")
@@ -50,12 +47,20 @@ df$Count <- as.numeric(df$Count)
 df$URL <- as.character(df$URL)
 beep()
 
-plot=ggplot(df, aes(x=Date,y=Count,colour=Type)) +     geom_line() +     xlab("")
+plot1=ggplot(df, aes(x=Date,y=Count,colour=Type)) +     geom_line() +     xlab("")
 
 ## Manually pick words which will be excluded from the norm count
 exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUSTABLE",
              "unidad reajustable","U.R.","UR","U.R.A.","URA","Se fija","Se actualiza","SUSCRITO",
              "ANEXO","DESIGNA", "DESIGNACIÓN","ESCUELA","PARTIDAS","COMISIÓN", "MERCOSUR",
              "MERCADO COMÚN","EMISIÓN","SALARIO MÍNIMO NACIONAL",
-             "MONTO MÍNIMO DE LAS JUBILACIONES","INTERÉS NACIONAL", "COMPLEMENTACIÓN","COOPERACIÓN")
+             "MONTO MÍNIMO DE LAS JUBILACIONES","INTERÉS NACIONAL",
+             "COMPLEMENTACIÓN","COOPERACIÓN") %>% {paste0("\\b",.,"\\b",collapse="|")}
 
+prune <- sapply(norm[3,],function(x) {
+  text <- unlist(x) %>% {.[!str_detect(.,exclude)]}
+  cant <- length(text) %>% as.numeric()
+  list(cant,text)})
+df$CountPrune <- prune[1,] %>% as.numeric()
+
+plot2=ggplot(df, aes(x=Date,y=CountPrune,colour=Type)) +     geom_line() +     xlab("")
