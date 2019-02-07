@@ -50,7 +50,7 @@ df$Count <- as.numeric(df$Count)
 df$URL <- as.character(df$URL)
 beep()
 
-plot=ggplot(df, aes(x=Date,y=Count,colour=Type)) +     geom_line() +     xlab("")
+plot1=ggplot(df, aes(x=Date,y=Count,colour=Type)) +     geom_line() +     xlab("")
 
 ## Manually pick words which will be excluded from the norm count
 exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUSTABLE",
@@ -64,4 +64,6 @@ prune <- sapply(norm[3,],function(x) {
   text <- unlist(x) %>% {.[!str_detect(.,exclude)]}
   cant <- length(text) %>% as.numeric()
   list(cant,text)})
+df$CountPrune <- prune[1,] %>% as.numeric()
 
+plot2=ggplot(df, aes(x=Date,y=CountPrune,colour=Type)) +     geom_line() +     xlab("")
