@@ -1,8 +1,5 @@
-library(rvest)
-library(magrittr)
-library(tidyverse)
-library(lubridate)
-library(beepr)
+packages <-c("rvest","magrittr","tidyverse","lubridate","beepr")
+invisible(lapply(packages, library, character.only = TRUE))
 
 # Set legislature periods, norm type (law or decree) and the base url
 periods <- c("2000-2005","2005-2010","2010-2015","2015-2020")
