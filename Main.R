@@ -57,5 +57,7 @@ exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUST
              "unidad reajustable","U.R.","UR","U.R.A.","URA","Se fija","Se actualiza","SUSCRITO",
              "ANEXO","DESIGNA", "DESIGNACIÓN","ESCUELA","PARTIDAS","COMISIÓN", "MERCOSUR",
              "MERCADO COMÚN","EMISIÓN","SALARIO MÍNIMO NACIONAL",
-             "MONTO MÍNIMO DE LAS JUBILACIONES","INTERÉS NACIONAL", "COMPLEMENTACIÓN","COOPERACIÓN")
+             "MONTO MÍNIMO DE LAS JUBILACIONES","INTERÉS NACIONAL",
+             "COMPLEMENTACIÓN","COOPERACIÓN") %>% {paste0("\\b",.,"\\b",collapse="|")}
 
+prune <- sapply(norm[3,],function(x) unlist(x) %>% {.[!str_detect(.,exclude)]})
