@@ -64,7 +64,7 @@ df$CountPrune[is.na(df$Count)] <- NA
 
 lawseas <- subset(df,Type %in% "Leyes") %>% {.[order(.$Date),]} %>% 
   {.[,!names(.) %in% c("Type","URL","Date")]} %>% 
-  ts(start=c(2000,3),frequency=12) %>% seas(x11="")
+  ts(start=c(2000,3),frequency=12) %>% seas(x11="",na.action=na.x13)
 
 dfmelt <- melt(df,id=c("Date","Type","URL"))
 datdec <- subset(dfmelt,Type %in% "Decretos")
