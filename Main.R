@@ -60,6 +60,7 @@ prune <- sapply(norm[3,],function(x) {
   cant <- length(text) %>% as.numeric()
   list(cant,text)})
 df$CountPrune <- prune[1,] %>% as.numeric()
+df$CountPrune[is.na(df$Count)] <- NA
 
 lawseas <- subset(df,Type %in% "Leyes") %>% {.[order(.$Date),]} %>% 
   {.[,!names(.) %in% c("Type","URL","Date")]} %>% 
