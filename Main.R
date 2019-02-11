@@ -1,4 +1,4 @@
-packages <-c("rvest","magrittr","tidyverse","lubridate","beepr","reshape2")
+packages <-c("rvest","magrittr","tidyverse","lubridate","beepr","reshape2","seasonal")
 invisible(lapply(packages, library, character.only = TRUE))
 
 # Set legislature periods, norm type (law or decree) and the base url
@@ -60,6 +60,10 @@ prune <- sapply(norm[3,],function(x) {
   cant <- length(text) %>% as.numeric()
   list(cant,text)})
 df$CountPrune <- prune[1,] %>% as.numeric()
+
+lawseas <- subset(df,Type %in% "Leyes") %>% {.[order(.$Date),]} %>% 
+  {.[,!names(.) %in% c("Type","URL")]} %>% 
+  ts(start=c(2000,3),end=c(2018,12),frequency=12)
 
 dfmelt <- melt(df,id=c("Date","Type","URL"))
 datdec <- subset(dfmelt,Type %in% "Decretos")
