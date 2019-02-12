@@ -62,9 +62,12 @@ prune <- sapply(norm[3,],function(x) {
 df$CountPrune <- prune[1,] %>% as.numeric()
 df$CountPrune[is.na(df$Count)] <- NA
 
-lawseas <- subset(df,Type %in% "Leyes") %>% {.[order(.$Date),]} %>% 
-  {.[,!names(.) %in% c("Type","URL","Date")]} %>% 
-  ts(start=c(2000,3),frequency=12) %>% seas(x11="",na.action=na.x13)
+seas <- sapply(c("Leyes","Decretos"),function(x)
+  sapply(c("Count","CountPrune"),function(y) 
+    subset(df,Type %in% x,select=c("Date",y)) %>% {.[order(.$Date),]} %>% 
+    {.[,!names(.) %in% c("Type","URL","Date")]} %>% 
+      ts(start=c(2000,3),frequency=12) %>% seas(x11="",na.action=na.x13) %>% final()
+  ))
 
 dfmelt <- melt(df,id=c("Date","Type","URL"))
 datdec <- subset(dfmelt,Type %in% "Decretos")
