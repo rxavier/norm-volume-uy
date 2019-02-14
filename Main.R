@@ -59,19 +59,19 @@ prune <- sapply(norm[3,],function(x) {
   text <- unlist(x) %>% {.[!str_detect(.,exclude)]}
   cant <- length(text) %>% as.numeric()
   list(cant,text)})
-df$CountPrune <- prune[1,] %>% as.numeric()
-df$CountPrune[is.na(df$Count)] <- NA
+df$Count_Prune <- prune[1,] %>% as.numeric()
+df$Count_Prune[is.na(df$Count)] <- NA
 
 seas <- sapply(c("Leyes","Decretos"),function(x)
-  sapply(c("Count","CountPrune"),function(y) 
+  sapply(c("Count","Count_Prune"),function(y) 
     subset(df,Type %in% x,select=c("Date",y)) %>% {.[order(.$Date),]} %>% 
     {.[,!names(.) %in% c("Type","URL","Date")]} %>% 
       ts(start=c(2000,3),frequency=12) %>% seas(x11="",na.action=na.x13) %>% final()
   ))
 
 df <- df[with(df,order(df$Type,df$Date)),]
-colnames(seas[[2]]) <- c("Count_Seas","Count_Prune_Seas")
 colnames(seas[[1]]) <- c("Count_Seas","Count_Prune_Seas")
+colnames(seas[[2]]) <- c("Count_Seas","Count_Prune_Seas")
 df <- rbind.data.frame(seas[[2]],seas[[1]]) %>% cbind.data.frame(df,.)
 
 dfmelt <- melt(df,id=c("Date","Type","URL"))
