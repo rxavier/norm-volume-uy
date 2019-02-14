@@ -74,13 +74,13 @@ seas <- sapply(c("Leyes", "Decretos"), function(x)
   ))
 
 # Rebuild dataframe with seasonally adjusted series
-df <- df[with(df, order(df$Type,df$Date)),]
+df_full <- df[with(df, order(df$Type,df$Date)),]
 colnames(seas[[1]]) <- c("Count_Seas", "Count_Prune_Seas")
 colnames(seas[[2]]) <- c("Count_Seas", "Count_Prune_Seas")
-df <- rbind.data.frame(seas[[2]], seas[[1]]) %>% cbind.data.frame(df,.)
+df_full <- rbind.data.frame(seas[[2]], seas[[1]]) %>% cbind.data.frame(df_full,.)
 
 # Transform dataframe to long format, subset only seasonally adjusted series and plot
-df_melt <- melt(df,id=c("Date", "Type", "URL"))
-df_melt_seas <- df_melt[which(dfmelt$variable=="Count_Prune_Seas"),]
+df_full_melt <- melt(df,id=c("Date", "Type", "URL"))
+df_seas_melt <- df_full_melt[which(df_full_melt$variable=="Count_Prune_Seas"),]
 
-plot=ggplot(df_melt_seas, aes(x=Date, y=value, colour=Type)) +     geom_line() +     xlab("")
+plot=ggplot(df_seas_melt, aes(x=Date, y=value, colour=Type)) +     geom_line() +     xlab("")
