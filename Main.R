@@ -2,23 +2,23 @@ packages <-c("rvest","magrittr","tidyverse","lubridate","beepr","reshape2","seas
 invisible(lapply(packages, library, character.only = TRUE))
 
 # Set legislature periods, norm type (law or decree) and the base url
-periods <- c("2000-2005","2005-2010","2010-2015","2015-2020")
-normtype <- c("leyes", "decretos")
-baseurl <- "https://www.presidencia.gub.uy"
+periods <- c("2000-2005", "2005-2010", "2010-2015", "2015-2020")
+norm_type <- c("leyes", "decretos")
+base_url <- "https://www.presidencia.gub.uy"
 
 # Loop to create the 8 URLs (4 periods, 2 type of norm)
-urlpertype <- paste(baseurl, "normativa", periods, sep = "/") %>%
+url_per_type <- paste(base_url, "normativa", periods, sep = "/") %>%
   sapply(function(x) {
-    url <- paste(x, normtype, sep = "/")
+    url <- paste(x,norm_type,sep = "/")
     # 2005-2010 URLs have a different format than the rest so I take that into consideration
-    urlfix <- ifelse(str_extract(url,"[0-9]+-[0-9]+")=="2005-2010",
-                     paste(url,"inicio",sep="/"), url) %>%
+    url_fix <- ifelse(str_extract(url, "[0-9]+-[0-9]+")=="2005-2010",
+                      paste(url, "inicio", sep="/"), url) %>%
       list()
   }) %>%
   unlist()
 
-# Scrape the above URLs to get the URL extention to every month for both laws and decrees
-ext <- sapply(urlpertype, function (x) {
+# Scrape the above URLs to get the URL extension for every month for both laws and decrees
+ext <- sapply(url_per_type, function (x) {
   read_html(x) %>%
     html_nodes("#desarrollo a") %>%
     html_attr("href") %>% trimws()
@@ -26,23 +26,24 @@ ext <- sapply(urlpertype, function (x) {
   unlist()
 
 # Exclude URLs that don't correspond to months
-ext <- ext[grep("[a-z0-9-]{12,16}",ext)]
+ext <- ext[grep("[a-z0-9-]{12,16}", ext)]
 
 # Loop to build final monthly URLs and scrape each of them for the data
 norm <- sapply(ext, function(x) {tryCatch({
-  url <- paste0(baseurl, x)
+  url <- paste0(base_url, x)
   web <- read_html(url)
-  text <- html_nodes(web, "#desarrollo a") %>% html_text() %>% trimws() %>% str_replace_all("\\s+"," ")
-  cant <- length(text) %>% as.numeric()
-  list(url,cant,text)},
-  error=function(e) c(url,NA,NA))
+  text <- html_nodes(web, "#desarrollo a") %>% html_text() %>% trimws() %>% str_replace_all("\\s+", " ")
+  count <- length(text) %>% as.numeric()
+  list(url, count, text)},
+  error=function(e) c(url, NA, NA))
 })
 
 # Build the dataframe, parse dates and set classes
-df<-cbind(norm[1,],norm[2,]) %>% data.frame()
-colnames(df) <- c("URL","Count")
-df$Date <- str_extract(df$URL,"-[0-9]+-[0-9]{2,4}") %>% substring(2) %>% parse_date_time(orders=c("mY","my")) %>% as.Date()
-df$Type <- str_extract(df$URL,"/[a-z]{5,8}/") %>% {gsub("/","",.)} %>% str_to_title()
+df<-cbind(norm[1,], norm[2,]) %>% data.frame()
+colnames(df) <- c("URL", "Count")
+df$Date <- str_extract(df$URL, "-[0-9]+-[0-9]{2,4}") %>% substring(2) %>%
+  parse_date_time(orders=c("mY", "my")) %>% as.Date()
+df$Type <- str_extract(df$URL, "/[a-z]{5,8}/") %>% {gsub("/", "", .)} %>% str_to_title()
 df$Count <- as.numeric(df$Count)
 df$URL <- as.character(df$URL)
 beep()
@@ -55,26 +56,31 @@ exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUST
              "MONTO MÍNIMO DE LAS JUBILACIONES","INTERÉS NACIONAL",
              "COMPLEMENTACIÓN","COOPERACIÓN") %>% {paste0("\\b",.,"\\b",collapse="|")}
 
-prune <- sapply(norm[3,],function(x) {
-  text <- unlist(x) %>% {.[!str_detect(.,exclude)]}
-  cant <- length(text) %>% as.numeric()
-  list(cant,text)})
+# Remove norms that contain words in 'exclude'
+prune <- sapply(norm[3,], function(x) {
+  text <- unlist(x) %>% {.[!str_detect(., exclude)]}
+  count_prune <- length(text) %>% as.numeric()
+  list(count_prune, text)})
 df$Count_Prune <- prune[1,] %>% as.numeric()
+# Set count_prune to NA if count has an NA
 df$Count_Prune[is.na(df$Count)] <- NA
 
-seas <- sapply(c("Leyes","Decretos"),function(x)
-  sapply(c("Count","Count_Prune"),function(y) 
-    subset(df,Type %in% x,select=c("Date",y)) %>% {.[order(.$Date),]} %>% 
-    {.[,!names(.) %in% c("Type","URL","Date")]} %>% 
-      ts(start=c(2000,3),frequency=12) %>% seas(x11="",na.action=na.x13) %>% final()
+# Output seasonally adjusted time series
+seas <- sapply(c("Leyes", "Decretos"), function(x)
+  sapply(c("Count", "Count_Prune"), function(y) 
+    subset(df,Type %in% x,select=c("Date", y)) %>% {.[order(.$Date),]} %>% 
+    {.[,!names(.) %in% c("Type", "URL", "Date")]} %>% 
+      ts(start=c(2000, 3),frequency=12) %>% seas(x11="", na.action=na.x13) %>% final()
   ))
 
-df <- df[with(df,order(df$Type,df$Date)),]
-colnames(seas[[1]]) <- c("Count_Seas","Count_Prune_Seas")
-colnames(seas[[2]]) <- c("Count_Seas","Count_Prune_Seas")
-df <- rbind.data.frame(seas[[2]],seas[[1]]) %>% cbind.data.frame(df,.)
+# Rebuild dataframe with seasonally adjusted series
+df <- df[with(df, order(df$Type,df$Date)),]
+colnames(seas[[1]]) <- c("Count_Seas", "Count_Prune_Seas")
+colnames(seas[[2]]) <- c("Count_Seas", "Count_Prune_Seas")
+df <- rbind.data.frame(seas[[2]], seas[[1]]) %>% cbind.data.frame(df,.)
 
-df_melt <- melt(df,id=c("Date","Type","URL"))
+# Transform dataframe to long format, subset only seasonally adjusted series and plot
+df_melt <- melt(df,id=c("Date", "Type", "URL"))
 df_melt_seas <- df_melt[which(dfmelt$variable=="Count_Prune_Seas"),]
 
-plot=ggplot(df_melt_seas, aes(x=Date,y=value,colour=Type)) +     geom_line() +     xlab("")
+plot=ggplot(df_melt_seas, aes(x=Date, y=value, colour=Type)) +     geom_line() +     xlab("")
