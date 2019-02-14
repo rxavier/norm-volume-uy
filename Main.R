@@ -74,9 +74,7 @@ colnames(seas[[1]]) <- c("Count_Seas","Count_Prune_Seas")
 colnames(seas[[2]]) <- c("Count_Seas","Count_Prune_Seas")
 df <- rbind.data.frame(seas[[2]],seas[[1]]) %>% cbind.data.frame(df,.)
 
-dfmelt <- melt(df,id=c("Date","Type","URL"))
-datdec <- subset(dfmelt,Type %in% "Decretos")
-datlaw <- subset(dfmelt,Type %in% "Leyes")
+df_melt <- melt(df,id=c("Date","Type","URL"))
+df_melt_seas <- df_melt[which(dfmelt$variable=="Count_Prune_Seas"),]
 
-plot1=ggplot(datdec, aes(x=Date,y=value,colour=variable)) +     geom_line() +     xlab("")
-plot2=ggplot(datlaw, aes(x=Date,y=value,colour=variable)) +     geom_line() +     xlab("")
+plot=ggplot(df_melt_seas, aes(x=Date,y=value,colour=Type)) +     geom_line() +     xlab("")
