@@ -65,12 +65,15 @@ df$Count_Prune <- prune[1,] %>% as.numeric()
 # Set count_prune to NA if count has an NA
 df$Count_Prune[is.na(df$Count)] <- NA
 
-# Output seasonally adjusted time series
-seas <- sapply(c("Leyes", "Decretos"), function(x)
+# Decompose time series. Output seasonally adjusted ts and trend
+decomp <- sapply(c("Leyes", "Decretos"), function(x)
   sapply(c("Count", "Count_Prune"), function(y) 
-    subset(df,Type %in% x,select=c("Date", y)) %>% {.[order(.$Date),]} %>% 
-    {.[,!names(.) %in% c("Type", "URL", "Date")]} %>% 
-      ts(start=c(2000, 3),frequency=12) %>% seas(x11="", na.action=na.x13) %>% final()
+  {decomp_proc <- subset(df,Type %in% x,select=c("Date", y)) %>% {.[order(.$Date),]} %>% 
+  {.[,!names(.) %in% c("Type", "URL", "Date")]} %>% 
+    ts(start=c(2000, 3),frequency=12) %>% seas(x11="", na.action=na.x13)
+  decomp_seas <- final(decomp_proc)
+  decomp_trend <- trend(decomp_proc)
+  list(decomp_seas,decomp_trend)}
   ))
 
 # Rebuild dataframe with seasonally adjusted series
