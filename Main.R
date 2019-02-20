@@ -85,9 +85,9 @@ df_full <- df[with(df, order(df$Type,df$Date)),] %>% cbind.data.frame(.,df_decom
 
 # Transform dataframe to long format and plot
 df_full_melt <- melt(df_full,id=c("Date", "Type", "URL"))
-ggplot(df_full_melt, aes(x=Date, y=value, colour=Type)) + geom_line() + facet_grid(~variable)
+ggplot(df_full_melt, aes(x=Date, y=value, colour=Type)) +
+  geom_line() + ylab("Count") + xlab("") + facet_grid(~variable) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ggplot(df_full_melt[which(df_full_melt$variable==
                             c("Count_Prune","Count_Prune_Seas", "Count_Prune_Trend")),],
-       aes(x=Date, y=value, colour=variable)) + geom_line() + facet_grid(~Type)
-
-plot=ggplot(df_seas_melt, aes(x=Date, y=value, colour=Type)) +     geom_line() +     xlab("")
+       aes(x=Date, y=value, colour=variable)) + geom_line() + ylab("Count") + facet_grid(~Type)
