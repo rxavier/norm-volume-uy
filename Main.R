@@ -83,8 +83,11 @@ df_full <- df[with(df, order(df$Type,df$Date)),] %>% cbind.data.frame(.,df_decom
   .[c("URL", "Date", "Type", "Count", "Count_Seas", "Count_Trend", "Count_Prune",
       "Count_Prune_Seas", "Count_Prune_Trend")]
 
-# Transform dataframe to long format, subset only seasonally adjusted series and plot
+# Transform dataframe to long format and plot
 df_full_melt <- melt(df_full,id=c("Date", "Type", "URL"))
-df_seas_melt <- df_full_melt[which(df_full_melt$variable=="Count_Prune_Seas"),]
+ggplot(df_full_melt, aes(x=Date, y=value, colour=Type)) + geom_line() + facet_grid(~variable)
+ggplot(df_full_melt[which(df_full_melt$variable==
+                            c("Count_Prune","Count_Prune_Seas", "Count_Prune_Trend")),],
+       aes(x=Date, y=value, colour=variable)) + geom_line() + facet_grid(~Type)
 
 plot=ggplot(df_seas_melt, aes(x=Date, y=value, colour=Type)) +     geom_line() +     xlab("")
