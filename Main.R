@@ -65,22 +65,36 @@ df$Count_Prune <- prune[1,] %>% as.numeric()
 # Set count_prune to NA if count has an NA
 df$Count_Prune[is.na(df$Count)] <- NA
 
-# Output seasonally adjusted time series
-seas <- sapply(c("Leyes", "Decretos"), function(x)
+# Decompose time series. Output seasonally adjusted ts and trend
+decomp <- sapply(c("Leyes", "Decretos"), function(x)
   sapply(c("Count", "Count_Prune"), function(y) 
-    subset(df,Type %in% x,select=c("Date", y)) %>% {.[order(.$Date),]} %>% 
-    {.[,!names(.) %in% c("Type", "URL", "Date")]} %>% 
-      ts(start=c(2000, 3),frequency=12) %>% seas(x11="", na.action=na.x13) %>% final()
+  {decomp_proc <- subset(df,Type %in% x,select=c("Date", y)) %>% {.[order(.$Date),]} %>% 
+  {.[,!names(.) %in% c("Type", "URL", "Date")]} %>% 
+    ts(start=c(2000, 3),frequency=12) %>% seas(x11="", na.action=na.x13)
+  decomp_seas <- final(decomp_proc)
+  decomp_trend <- trend(decomp_proc)
+  list(decomp_seas,decomp_trend)}
   ))
 
-# Rebuild dataframe with seasonally adjusted series
-df_full <- df[with(df, order(df$Type,df$Date)),]
-colnames(seas[[1]]) <- c("Count_Seas", "Count_Prune_Seas")
-colnames(seas[[2]]) <- c("Count_Seas", "Count_Prune_Seas")
-df_full <- rbind.data.frame(seas[[2]], seas[[1]]) %>% cbind.data.frame(df_full,.)
+# Rebuild dataframe with seasonally adjusted and trend series
+df_decomp <- rbind.data.frame(decomp[5:8],decomp[1:4]) %>% 
+  `colnames<-` (c("Count_Seas","Count_Trend","Count_Prune_Seas","Count_Prune_Trend"))
+df_full <- df[with(df, order(df$Type,df$Date)),] %>% cbind.data.frame(.,df_decomp) %>%
+  .[c("URL", "Date", "Type", "Count", "Count_Seas", "Count_Trend", "Count_Prune",
+      "Count_Prune_Seas", "Count_Prune_Trend")]
 
-# Transform dataframe to long format, subset only seasonally adjusted series and plot
+# Transform dataframe to long format and plot
 df_full_melt <- melt(df_full,id=c("Date", "Type", "URL"))
-df_seas_melt <- df_full_melt[which(df_full_melt$variable=="Count_Prune_Seas"),]
 
-plot=ggplot(df_seas_melt, aes(x=Date, y=value, colour=Type)) +     geom_line() +     xlab("")
+ggplot(df_full_melt, aes(x=Date, y=value, colour=Type)) +
+  geom_line() + ylab("Count") + xlab("") + facet_grid(~variable) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggplot(df_full_melt[which(df_full_melt$variable==
+                            c("Count_Prune","Count_Prune_Seas", "Count_Prune_Trend")),],
+       aes(x=Date, y=value, colour=variable)) + geom_line() + ylab("Count") +
+  facet_wrap(~Type,scales="free_y")
+
+ggplot(df_full_melt[which(df_full_melt$variable==c("Count_Prune_Trend")),],
+       aes(x=Date, y=value, colour=variable)) + geom_line() + ylab("Count") +
+  facet_wrap(~Type,scales="free_y")
