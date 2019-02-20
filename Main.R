@@ -90,4 +90,4 @@ ggplot(df_full_melt, aes(x=Date, y=value, colour=Type)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ggplot(df_full_melt[which(df_full_melt$variable==
                             c("Count_Prune","Count_Prune_Seas", "Count_Prune_Trend")),],
-       aes(x=Date, y=value, colour=variable)) + geom_line() + ylab("Count") + facet_grid(~Type)
+       aes(x=Date, y=value, colour=variable)) + geom_line() + ylab("Count") + facet_wrap(~Type,scales="free_y")
