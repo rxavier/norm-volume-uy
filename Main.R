@@ -77,9 +77,11 @@ decomp <- sapply(c("Leyes", "Decretos"), function(x)
   ))
 
 # Rebuild dataframe with seasonally adjusted and trend series
-df_full <- df[with(df, order(df$Type,df$Date)),]
-df_full <- rbind.data.frame(decomp[5:8],decomp[1:4]) %>% cbind.data.frame(df_full,.)
-colnames(df_full)[6:9] <- c("Count_Seas","Count_Trend","Count_Prune_Seas","Count_Prune_Trend")
+df_decomp <- rbind.data.frame(decomp[5:8],decomp[1:4]) %>% 
+  `colnames<-` (c("Count_Seas","Count_Trend","Count_Prune_Seas","Count_Prune_Trend"))
+df_full <- df[with(df, order(df$Type,df$Date)),] %>% cbind.data.frame(.,df_decomp) %>%
+  .[c("URL", "Date", "Type", "Count", "Count_Seas", "Count_Trend", "Count_Prune",
+      "Count_Prune_Seas", "Count_Prune_Trend")]
 
 # Transform dataframe to long format, subset only seasonally adjusted series and plot
 df_full_melt <- melt(df_full,id=c("Date", "Type", "URL"))
