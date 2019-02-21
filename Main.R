@@ -1,4 +1,4 @@
-packages <-c("rvest","magrittr","tidyverse","lubridate","beepr","reshape2","seasonal")
+packages <-c("rvest","magrittr","ggplot2","lubridate","beepr","tidyr","seasonal")
 invisible(lapply(packages, library, character.only = TRUE))
 
 # Set legislature periods, norm type (law or decree) and the base url
@@ -84,7 +84,7 @@ df_full <- df[with(df, order(df$Type,df$Date)),] %>% cbind.data.frame(.,df_decom
       "Count_Prune_Seas", "Count_Prune_Trend")]
 
 # Transform dataframe to long format and plot
-df_full_melt <- melt(df_full,id=c("Date", "Type", "URL"))
+df_full_melt <- gather(df_full,Key,Count,Count:Count_Prune_Trend)
 
 ggplot(df_full_melt, aes(x=Date, y=value, colour=Type)) +
   geom_line() + ylab("Count") + xlab("") + facet_grid(~variable) +
