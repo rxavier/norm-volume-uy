@@ -12,15 +12,13 @@ url_per_type <- paste(base_url, "normativa", periods, sep = "/") %>%
     url <- paste(x,norm_type,sep = "/")
     # 2005-2010 URLs have a different format than the rest so I take that into consideration
     url_fix <- ifelse(str_extract(url, "[0-9]+-[0-9]+")=="2005-2010",
-                      paste(url, "inicio", sep="/"), url) %>%
-      list()
+                      paste(url, "inicio", sep="/"), url) %>% list()
   }) %>%
   unlist()
 
 # Scrape the above URLs to get the URL extension for every month for both laws and decrees
 ext <- sapply(url_per_type, function (x) {
-  read_html(x) %>%
-    html_nodes("#desarrollo a") %>%
+  read_html(x) %>% html_nodes("#desarrollo a") %>%
     html_attr("href") %>% trimws()
 }) %>%
   unlist()
@@ -32,7 +30,8 @@ ext <- ext[grep("[a-z0-9-]{12,16}", ext)]
 norm <- sapply(ext, function(x) {tryCatch({
   url <- paste0(base_url, x)
   web <- read_html(url)
-  text <- html_nodes(web, "#desarrollo a") %>% html_text() %>% trimws() %>% str_replace_all("\\s+", " ")
+  text <- html_nodes(web, "#desarrollo a") %>% html_text() %>%
+    trimws() %>% str_replace_all("\\s+", " ")
   count <- length(text) %>% as.numeric()
   list(url, count, text)},
   error=function(e) c(url, NA, NA))
@@ -43,7 +42,8 @@ df<-cbind(norm[1,], norm[2,]) %>% data.frame()
 colnames(df) <- c("URL", "Count")
 df$Date <- str_extract(df$URL, "-[0-9]+-[0-9]{2,4}") %>% substring(2) %>%
   parse_date_time(orders=c("mY", "my")) %>% as.Date()
-df$Type <- str_extract(df$URL, "/[a-z]{5,8}/") %>% {gsub("/", "", .)} %>% str_to_title()
+df$Type <- str_extract(df$URL, "/[a-z]{5,8}/") %>%
+  {gsub("/", "", .)} %>% str_to_title()
 df$Count <- as.numeric(df$Count)
 df$URL <- as.character(df$URL)
 beep()
@@ -68,8 +68,8 @@ df$Count_Prune[is.na(df$Count)] <- NA
 # Decompose time series. Output seasonally adjusted ts and trend
 decomp <- sapply(c("Leyes", "Decretos"), function(x)
   sapply(c("Count", "Count_Prune"), function(y) 
-  {decomp_proc <- subset(df,Type %in% x,select=c("Date", y)) %>% {.[order(.$Date),]} %>% 
-  {.[,!names(.) %in% c("Type", "URL", "Date")]} %>% 
+  {decomp_proc <- subset(df,Type %in% x,select=c("Date", y)) %>%
+    {.[order(.$Date),]} %>% {.[,!names(.) %in% c("Type", "URL", "Date")]} %>% 
     ts(start=c(2000, 3),frequency=12) %>% seas(x11="", na.action=na.x13)
   decomp_seas <- final(decomp_proc)
   decomp_trend <- trend(decomp_proc)
