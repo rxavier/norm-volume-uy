@@ -1,4 +1,4 @@
-packages <-c("rvest","magrittr","ggplot2","lubridate","beepr","tidyr","seasonal")
+packages <-c("rvest","magrittr","ggplot2","lubridate","beepr","tidyr","seasonal","stringr")
 invisible(lapply(packages, library, character.only = TRUE))
 
 # Set legislature periods, norm type (law or decree) and the base url
@@ -24,7 +24,7 @@ ext <- sapply(url_per_type, function (x) {
   unlist()
 
 # Exclude URLs that don't correspond to months
-ext <- ext[grep("[a-z0-9-]{12,16}", ext)]
+ext <- str_subset(ext,"[a-z0-9-]{12,16}")
 
 # Loop to build final monthly URLs and scrape each of them for the data
 norm <- sapply(ext, function(x) {tryCatch({
@@ -86,15 +86,15 @@ df_full <- df[with(df, order(df$Type,df$Date)),] %>% cbind.data.frame(.,df_decom
 # Transform dataframe to long format and plot
 df_full_melt <- gather(df_full,Key,Count,Count:Count_Prune_Trend)
 
-ggplot(df_full_melt, aes(x=Date, y=value, colour=Type)) +
-  geom_line() + ylab("Count") + xlab("") + facet_grid(~variable) +
+ggplot(df_full_melt, aes(x=Date, y=Count, colour=Type)) +
+  geom_line() + ylab("Count") + xlab("") + facet_grid(~Key) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-ggplot(df_full_melt[which(df_full_melt$variable==
+ggplot(df_full_melt[which(df_full_melt$Key==
                             c("Count_Prune","Count_Prune_Seas", "Count_Prune_Trend")),],
-       aes(x=Date, y=value, colour=variable)) + geom_line() + ylab("Count") +
-  facet_wrap(~Type,scales="free_y")
+       aes(x=Date, y=Count, colour=Type)) + geom_line() + ylab("Count") +
+  facet_wrap(~Key,scales="free_y")
 
-ggplot(df_full_melt[which(df_full_melt$variable==c("Count_Prune_Trend")),],
-       aes(x=Date, y=value, colour=variable)) + geom_line() + ylab("Count") +
+ggplot(df_full_melt[which(df_full_melt$Key==c("Count_Prune_Trend")),],
+       aes(x=Date, y=Count)) + geom_line() + ylab("Count") +
   facet_wrap(~Type,scales="free_y")
