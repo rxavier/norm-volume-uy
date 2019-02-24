@@ -91,9 +91,9 @@ ggplot(df_full_melt, aes(x=Date, y=Count, colour=Type)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 ggplot(df_full_melt[which(df_full_melt$Key==
-                            c("Count_Prune","Count_Prune_Seas", "Count_Prune_Trend")),],
-       aes(x=Date, y=Count, colour=Type)) + geom_line() + ylab("Count") +
-  facet_wrap(~Key,scales="free_y")
+                            c("Count", "Count_Trend")),],
+       aes(x=Date, y=Count, colour=Key)) + geom_line() + ylab("Count") +
+  facet_wrap(~Type,scales="free_y")
 
 ggplot(df_full_melt[which(df_full_melt$Key==c("Count_Prune_Trend")),],
        aes(x=Date, y=Count)) + geom_line() + ylab("Count") +
