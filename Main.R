@@ -91,18 +91,25 @@ df_full$Time <- sequence(rle(df_full$Legislature)$lengths)
 df_full_melt <- gather(df_full,Key,Count,Count:Count_Prune_Trend)
 
 ggplot(df_full_melt, aes(x=Date, y=Count, colour=Type)) +
-  geom_line() + ylab("Count") + xlab("") + facet_grid(~Key) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  geom_line() + labs(title="Testeo", y="Conteo", x="") +
+  facet_grid(~Key) + theme(axis.text.x=element_text(angle=90, hjust=1), legend.position="bottom") +
+  scale_color_discrete(name = "Tipo", labels=c("Decretos", "Leyes"))
 
 ggplot(df_full_melt[which(df_full_melt$Key==
                             c("Count", "Count_Trend")),],
-       aes(x=Date, y=Count, colour=Key)) + geom_line() + ylab("Count") +
+       aes(x=Date, y=Count, colour=Key)) + geom_line() +
+  labs(title="Decretos y leyes en Uruguay, 2000-2019", subtitle="Series simples y tendenciales", y="Conteo", x="") +
+  scale_color_discrete(name = "Tipo", labels=c("Simple", "Tendencia")) +
+  theme(legend.position="bottom") + facet_wrap(~Type,scales="free_y")
+
+ggplot(df_full_melt[which(df_full_melt$Key==c("Count_Prune_Trend")),],
+       aes(x=Date, y=Count)) + geom_line() +
+  labs(title="Decretos y leyes en Uruguay, 2000-2019", subtitle="Series tendenciales depuradas", y="Conteo", x="") +
   facet_wrap(~Type,scales="free_y")
 
 ggplot(df_full_melt[which(df_full_melt$Key==c("Count_Prune_Trend")),],
-       aes(x=Date, y=Count)) + geom_line() + ylab("Count") +
-  facet_wrap(~Type,scales="free_y")
-
-ggplot(df_full_melt[which(df_full_melt$Key==c("Count_Prune_Trend")),],
-       aes(x=Time, y=Count, colour=Legislature)) + geom_line() + ylab("Count") +
-  facet_wrap(~Type,scales="free_y")
+       aes(x=Time, y=Count, colour=Legislature)) + geom_line() + 
+  labs(title="Decretos y leyes en Uruguay, 2000-2019", subtitle="Series tendenciales depuradas por legislatura",
+       y="Conteo", x="Meses desde el comienzo de la legislatura") +
+  facet_wrap(~Type,scales="free_y") +
+  scale_color_discrete(name = "Legislatura") + theme(legend.position="bottom")
