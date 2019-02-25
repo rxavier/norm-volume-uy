@@ -50,7 +50,7 @@ beep()
 
 ## Manually pick words which will be excluded from the norm count
 exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUSTABLE",
-             "unidad reajustable","U.R.","UR","U.R.A.","URA","Se fija","Se actualiza","SUSCRITO",
+             "U.R.","UR","U.R.A.","URA","Se fija","Se actualiza","SUSCRITO",
              "ANEXO","DESIGNA", "DESIGNACIÓN","ESCUELA","PARTIDAS","COMISIÓN", "MERCOSUR",
              "MERCADO COMÚN","EMISIÓN","SALARIO MÍNIMO NACIONAL",
              "MONTO MÍNIMO DE LAS JUBILACIONES","INTERÉS NACIONAL",
@@ -58,7 +58,7 @@ exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUST
 
 # Remove norms that contain words in 'exclude'
 prune <- sapply(norm[3,], function(x) {
-  text <- unlist(x) %>% {.[!str_detect(., exclude)]}
+  text <- unlist(x) %>% {.[!str_detect(., fixed(exclude,ignore_case = TRUE))]}
   count_prune <- length(text) %>% as.numeric()
   list(count_prune, text)})
 df$Count_Prune <- prune[1,] %>% as.numeric()
