@@ -83,6 +83,10 @@ df_full <- df[with(df, order(df$Type,df$Date)),] %>% cbind.data.frame(.,df_decom
   .[c("URL", "Date", "Type", "Count", "Count_Seas", "Count_Trend", "Count_Prune",
       "Count_Prune_Seas", "Count_Prune_Trend")]
 
+# Define legislatures
+df_full$Legislature <- str_extract(df_full$URL,"[0-9]{4}-[0-9]{4}")
+df_full$Time <- sequence(rle(df_full$Legislature)$lengths)
+
 # Transform dataframe to long format and plot
 df_full_melt <- gather(df_full,Key,Count,Count:Count_Prune_Trend)
 
@@ -97,4 +101,8 @@ ggplot(df_full_melt[which(df_full_melt$Key==
 
 ggplot(df_full_melt[which(df_full_melt$Key==c("Count_Prune_Trend")),],
        aes(x=Date, y=Count)) + geom_line() + ylab("Count") +
+  facet_wrap(~Type,scales="free_y")
+
+ggplot(df_full_melt[which(df_full_melt$Key==c("Count_Prune_Trend")),],
+       aes(x=Time, y=Count, colour=Legislature)) + geom_line() + ylab("Count") +
   facet_wrap(~Type,scales="free_y")
