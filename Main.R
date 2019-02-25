@@ -71,8 +71,8 @@ decomp <- sapply(c("Leyes", "Decretos"), function(x)
   {decomp_proc <- subset(df,Type %in% x,select=c("Date", y)) %>%
     {.[order(.$Date),]} %>% {.[,!names(.) %in% c("Type", "URL", "Date")]} %>% 
     ts(start=c(2000, 3),frequency=12) %>% seas(x11="", na.action=na.x13)
-  decomp_seas <- final(decomp_proc)
-  decomp_trend <- trend(decomp_proc)
+  decomp_seas <- final(decomp_proc) %>% ifelse(.<0, 0, .)
+  decomp_trend <- trend(decomp_proc) %>% ifelse(.<0, 0, .)
   list(decomp_seas,decomp_trend)}
   ))
 
