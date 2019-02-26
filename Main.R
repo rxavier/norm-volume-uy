@@ -50,7 +50,7 @@ beep()
 
 ## Manually pick words which will be excluded from the norm count
 exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUSTABLE",
-             "unidad reajustable","U.R.","UR","U.R.A.","URA","Se fija","Se actualiza","SUSCRITO",
+             "U.R.","UR","U.R.A.","URA","Se fija","Se actualiza","SUSCRITO",
              "ANEXO","DESIGNA", "DESIGNACIÓN","ESCUELA","PARTIDAS","COMISIÓN", "MERCOSUR",
              "MERCADO COMÚN","EMISIÓN","SALARIO MÍNIMO NACIONAL",
              "MONTO MÍNIMO DE LAS JUBILACIONES","INTERÉS NACIONAL",
@@ -58,7 +58,7 @@ exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUST
 
 # Remove norms that contain words in 'exclude'
 prune <- sapply(norm[3,], function(x) {
-  text <- unlist(x) %>% {.[!str_detect(., exclude)]}
+  text <- unlist(x) %>% {.[!str_detect(., fixed(exclude,ignore_case = TRUE))]}
   count_prune <- length(text) %>% as.numeric()
   list(count_prune, text)})
 df$Count_Prune <- prune[1,] %>% as.numeric()
@@ -71,8 +71,8 @@ decomp <- sapply(c("Leyes", "Decretos"), function(x)
   {decomp_proc <- subset(df,Type %in% x,select=c("Date", y)) %>%
     {.[order(.$Date),]} %>% {.[,!names(.) %in% c("Type", "URL", "Date")]} %>% 
     ts(start=c(2000, 3),frequency=12) %>% seas(x11="", na.action=na.x13)
-  decomp_seas <- final(decomp_proc)
-  decomp_trend <- trend(decomp_proc)
+  decomp_seas <- final(decomp_proc) %>% ifelse(.<0, 0, .)
+  decomp_trend <- trend(decomp_proc) %>% ifelse(.<0, 0, .)
   list(decomp_seas,decomp_trend)}
   ))
 
@@ -91,18 +91,25 @@ df_full$Time <- sequence(rle(df_full$Legislature)$lengths)
 df_full_melt <- gather(df_full,Key,Count,Count:Count_Prune_Trend)
 
 ggplot(df_full_melt, aes(x=Date, y=Count, colour=Type)) +
-  geom_line() + ylab("Count") + xlab("") + facet_grid(~Key) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  geom_line() + labs(title="Testeo", y="Conteo", x="") +
+  facet_grid(~Key) + theme(axis.text.x=element_text(angle=90, hjust=1), legend.position="bottom") +
+  scale_color_discrete(name = "Tipo", labels=c("Decretos", "Leyes"))
 
 ggplot(df_full_melt[which(df_full_melt$Key==
                             c("Count", "Count_Trend")),],
-       aes(x=Date, y=Count, colour=Key)) + geom_line() + ylab("Count") +
+       aes(x=Date, y=Count, colour=Key)) + geom_line() +
+  labs(title="Decretos y leyes en Uruguay, 2000-2019", subtitle="Series simples y tendenciales", y="Conteo", x="") +
+  scale_color_discrete(name = "Tipo", labels=c("Simple", "Tendencia")) +
+  theme(legend.position="bottom") + facet_wrap(~Type,scales="free_y")
+
+ggplot(df_full_melt[which(df_full_melt$Key==c("Count_Prune_Trend")),],
+       aes(x=Date, y=Count)) + geom_line() +
+  labs(title="Decretos y leyes en Uruguay, 2000-2019", subtitle="Series tendenciales depuradas", y="Conteo", x="") +
   facet_wrap(~Type,scales="free_y")
 
 ggplot(df_full_melt[which(df_full_melt$Key==c("Count_Prune_Trend")),],
-       aes(x=Date, y=Count)) + geom_line() + ylab("Count") +
-  facet_wrap(~Type,scales="free_y")
-
-ggplot(df_full_melt[which(df_full_melt$Key==c("Count_Prune_Trend")),],
-       aes(x=Time, y=Count, colour=Legislature)) + geom_line() + ylab("Count") +
-  facet_wrap(~Type,scales="free_y")
+       aes(x=Time, y=Count, colour=Legislature)) + geom_line() + 
+  labs(title="Decretos y leyes en Uruguay, 2000-2019", subtitle="Series tendenciales depuradas por legislatura",
+       y="Conteo", x="Meses desde el comienzo de la legislatura") +
+  facet_wrap(~Type,scales="free_y") +
+  scale_color_discrete(name = "Legislatura") + theme(legend.position="bottom")
