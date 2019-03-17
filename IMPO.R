@@ -3,6 +3,9 @@ library(rvest)
 library(stringr)
 library(zoo)
 
+# Load function
+source('Request_and_parse.R')
+
 # Set defaults and initial values
 impo_url <- "https://www.impo.com.uy"
 suffix0 <- "/cgi-bin/bases/consultaBasesBS.cgi?tipoServicio=3&realizarconsulta=SI&nuevaconsulta=SI&parlistabases=&nrodocdesdehasta=0-"
@@ -31,37 +34,10 @@ date_df$Start <- date_df$End-as.POSIXlt(date_df$End)$mday + 1
 dates_url <- paste0("&fechadiar1=", str_replace_all(format(date_df$Start, "%d-%m-%Y"),"-","%2F"),
                     "&fechadiar2=", str_replace_all(format(date_df$End, "%d-%m-%Y"),"-","%2F"))
 
-type_norm <- type_norm_vec["Leyes"] # THIS IS TEMPORARY UNTIL LOOP IS IMPLEMENTED
-date <- dates_url[length(dates_url)-2] # THIS IS TEMPORARY UNTIL LOOP IS IMPLEMENTED
-
-# Build URL to be queried with only one document
-number_docs <- 1
-url <- paste0(impo_url, suffix0, number_docs, "&combo1=", type_norm, suffix1, date, suffix2)
-
-request_html <- GET(url, add_headers(headers)) %>% read_html()
-check1 <- html_nodes(request_html, ".contenido a") %>% html_text() %>% trimws() %>% toString()
-check2 <- (html_nodes(request_html, "p") %>% html_text() %>% trimws())[2] %>% toString()
-
-# If request text has error message asking for refresh, ping the refresh link and request again
-if (check1 == refresh_msg) {
-  html_nodes(request_html, ".contenido a") %>% html_attr("href") %>%
-  {GET(paste0(impo_url,.), add_headers(headers))}
-  request_html <- GET(url, add_headers(headers)) %>% read_html()
-} else {
-  print("No refresh necessary")
-  if (check2 == nodoc_msg) print("No documents found for the selected dates")
-}
-
-# Get available documents for month and type of document selected and rerun
-number_docs <- (html_nodes(request_html, "#divMsg b") %>% html_text() %>% trimws())[1]
-url <- paste0(impo_url, suffix0, number_docs, "&combo1=", type_norm, suffix1, date, suffix2)
-request_html <- GET(url, add_headers(headers)) %>% read_html()
-
-norm_number <- html_nodes(request_html, "strong") %>% html_text() %>% trimws()
-norm_text <- html_nodes(request_html, "font") %>% html_text() %>% trimws()
-norm_type <- norm_text[str_detect(norm_text, "\\(Documento|\\(Texto")]
-norm_content <- norm_text[!str_detect(norm_text, "\\(Documento|\\(Texto")]
-month <- str_extract_all(date, "(?<=fechadiar2=)[0-9%F]+") %>% str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
-norm_raw_df <- cbind.data.frame(month, norm_number, norm_type, norm_content)
-norm_df <- norm_raw_df[!duplicated(norm_raw_df$norm_number), ]
-                                            
+# Run function for laws
+type_norm <- type_norm_vec["Laws"]
+data <- request_norm_dates(type_norm, dates_url)
+flat_df <- cbind.data.frame(unlist(data[1, ]), unlist(data[2, ]), unlist(data[3, ]))
+flat_df["month"] <- rownames(flat_df) %>% str_extract_all("(?<=fechadiar2=)[0-9%F]+") %>%
+  str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
+flat_df_nodup <- flat_df[!duplicated(flat_df[, 1]), ] %>% `rownames<-` (NULL)
