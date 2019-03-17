@@ -9,7 +9,7 @@ source('Request_and_parse.R')
 # Set defaults and initial values
 impo_url <- "https://www.impo.com.uy"
 suffix0 <- "/cgi-bin/bases/consultaBasesBS.cgi?tipoServicio=3&realizarconsulta=SI&nuevaconsulta=SI&parlistabases=&nrodocdesdehasta=0-"
-type_norm_vec <- c("Leyes"=5, "Decretos"=6, "Resoluciones"=7, "Reglamentos"=11)
+type_norm_vec <- c("Laws"=5, "Decrees"=6, "Resolutions"=7, "Rules"=11)
 suffix1 <- "&numeros=&articulos=&textolibre=&texto1=&campotexto1=TODOS&optexto1=Y&texto2=&campotexto2=TODOS&optexto2=Y&texto3=&campotexto3=TODOS"
 suffix2 <- "&fechapro1=&fechapro2=&comboBaseTematica=&indexcombobasetematica=0&tema=&nvocabulario=&refinar="
 refresh_msg <- "Haga clic aqui para ingresar nuevamente al sistema."
