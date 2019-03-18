@@ -1,10 +1,10 @@
 request_norm_dates <- function(type_norm, date_list) {
   if (type_norm==5) {
-    number_docs <- 20}
-  else if (type_norm==6) {
     number_docs <- 50}
-  else {
+  else if (type_norm==6) {
     number_docs <- 100}
+  else {
+    number_docs <- 200}
   
   sapply(date_list, function(x) {
     month <- str_extract_all(x, "(?<=fechadiar2=)[0-9%F]+") %>% str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
