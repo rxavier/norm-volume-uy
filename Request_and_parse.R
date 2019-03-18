@@ -15,14 +15,15 @@ request_norm_dates <- function(type_norm, date_list) {
     
     if (check1 == refresh_msg) {
       html_nodes(request_html, ".contenido a") %>% html_attr("href") %>% {GET(paste0(impo_url,.), add_headers(headers))}
-      request_html <- GET(url, add_headers(headers)) %>% read_html()}
-    else {
-      print(paste0(format(month, "%m-%Y"), ": no refresh necessary"))
-      if (check2 == nodoc_msg) {
+      request_html <- GET(url, add_headers(headers)) %>% read_html()
+      print(paste0(format(month, "%m-%Y"), ": URL refreshed"))}
+    else if (check2 == nodoc_msg) {
         print(paste0(format(month, "%m-%Y"), ": no ", tolower(names(type_norm)), " found"))
-        return(list(NA, NA, NA))}}
+        return(list(NA, NA, NA))}
     
     number_docs_effective <- (html_nodes(request_html, "#divMsg b") %>% html_text() %>% trimws())[1]
+    print(paste0(format(month, "%m-%Y"),": ", number_docs_effective, " ", tolower(names(type_norm)), " found"))
+    
     if (number_docs_effective>=number_docs) {
       url <- paste0(impo_url, suffix0, number_docs_effective, "&combo1=", type_norm, suffix1, x, suffix2)
       request_html <- GET(url, add_headers(headers)) %>% read_html()}
