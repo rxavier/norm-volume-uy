@@ -3,8 +3,9 @@ request_norm_dates <- function(type_norm, date_list) {
     number_docs <- 50}
   else if (type_norm==6) {
     number_docs <- 100}
-  else {
-    number_docs <- 200}
+  else if (type_norm==7) {
+    number_docs <- 150}
+  else {number_docs <- 10}
   
   sapply(date_list, function(x) {
     month <- str_extract_all(x, "(?<=fechadiar2=)[0-9%F]+") %>% str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
@@ -18,8 +19,8 @@ request_norm_dates <- function(type_norm, date_list) {
       request_html <- GET(url, add_headers(headers)) %>% read_html()
       print(paste0(format(month, "%m-%Y"), ": URL refreshed"))}
     else if (check2 == nodoc_msg) {
-        print(paste0(format(month, "%m-%Y"), ": no ", tolower(names(type_norm)), " found"))
-        return(list(NA, NA, NA))}
+      print(paste0(format(month, "%m-%Y"), ": no ", tolower(names(type_norm)), " found"))
+      return(list(NA, NA, NA))}
     
     number_docs_effective <- (html_nodes(request_html, "#divMsg b") %>% html_text() %>% trimws())[1]
     print(paste0(format(month, "%m-%Y"),": ", number_docs_effective, " ", tolower(names(type_norm)), " found"))
