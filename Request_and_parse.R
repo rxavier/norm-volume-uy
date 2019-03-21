@@ -1,8 +1,8 @@
 request_norm_dates <- function(type, date_list) {
   if (type==5) {
-    number_docs <- 50}
+    number_docs <- 60}
   else if (type==6) {
-    number_docs <- 100}
+    number_docs <- 150}
   else if (type==7) {
     number_docs <- 150}
   else {number_docs <- 10}
