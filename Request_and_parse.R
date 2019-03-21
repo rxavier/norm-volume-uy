@@ -21,7 +21,7 @@ request_norm_dates <- function(type, date_list) {
     else if (check2 == nodoc_msg) {
       print(paste0(format(month, "%m-%Y"), ": no ",
                    tolower(names(type_norm)[which(type_norm==type)]), " found"))
-      return(list(NA, NA, NA))}
+      return(list(NA, NA, NA, NA))}
     
     number_docs_effective <- (html_nodes(request_html, "#divMsg b") %>% html_text() %>% trimws())[1]
     print(paste0(format(month, "%m-%Y"),": ", number_docs_effective, " ",
@@ -37,6 +37,7 @@ request_norm_dates <- function(type, date_list) {
       unlist() %>% trimws()
     norm_update <- str_extract_all(raw_table[,2], "\\(Documento\\s[A-z]+\\)|\\((Texto|Texto del)\\s[A-z]+\\)") %>%
       unlist() %>% trimws()
-    list(norm_number, norm_update, norm_title)
+    norm_link <- html_nodes(request_html, "a.visitado") %>% html_attr("href") %>% paste0(impo_url, .)
+    list(norm_number, norm_update, norm_title, norm_link)
   })
 }
