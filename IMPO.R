@@ -35,12 +35,16 @@ dates_url <- paste0("&fechadiar1=", str_replace_all(format(date_df$Start, "%d-%m
                     "&fechadiar2=", str_replace_all(format(date_df$End, "%d-%m-%Y"),"-","%2F"))
 
 # Run function for laws and decrees
-type_norm <- type_norm_vec[c("Laws", "Decrees")]
-data <- lapply(type_norm, function(x) request_norm_dates(x, dates_url))
-flat_df_laws <- cbind.data.frame(unlist(data[[1]][1, ]), unlist(data[[1]][2, ]), unlist(data[[1]][3, ]), unlist(data[[1]][4, ]), "Law") %>%
-  `colnames<-` (c("Number", "Type2", "Text", "Type1"))
-flat_df_decrees <- cbind.data.frame(unlist(data[[2]][1, ]), unlist(data[[2]][2, ]), unlist(data[[2]][3, ]), unlist(data[[2]][4, ]), "Decree") %>%
-  `colnames<-` (c("Number", "Type2", "Text", "Type1"))
+type_norm <- type_norm_vec["Laws"]
+data <- request_norm_dates(type_norm, dates_url)
+flat_df_laws <- cbind.data.frame(unlist(data[1, ]), unlist(data[2, ]), unlist(data[3, ]), unlist(data[4, ]), "Law") %>%
+  `colnames<-` (c("Number", "Type2", "Text", "URL", "Type1"))
+
+type_norm <- type_norm_vec["Decrees"]
+data <- request_norm_dates(type_norm, dates_url)
+flat_df_decrees <- cbind.data.frame(unlist(data[1, ]), unlist(data[2, ]), unlist(data[3, ]), unlist(data[4, ]), "Decree") %>%
+  `colnames<-` (c("Number", "Type2", "Text", "URL", "Type1"))
+
 flat_df <- rbind.data.frame(flat_df_laws, flat_df_decrees)
 flat_df["month"] <- rownames(flat_df) %>% str_extract_all("(?<=fechadiar2=)[0-9%F]+") %>%
   str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
