@@ -21,7 +21,7 @@ request_norm_dates <- function(type, dates) {
     else if (check2 == nodoc_msg) {
       print(paste0(format(month, "%m-%Y"), ": no ",
                    tolower(names(type_norm)[which(type_norm==type)]), " found"))
-      return(list(NA, NA, NA, NA))}
+      return(list("No norms found", "No norms found", "No norms found", "No norms found"))}
     
     number_docs_effective <- (html_nodes(request_html, "#divMsg b") %>% html_text() %>% trimws())[1]
     print(paste0(format(month, "%m-%Y"),": ", number_docs_effective, " ",
