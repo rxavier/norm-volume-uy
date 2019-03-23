@@ -42,3 +42,8 @@ request_norm_dates <- function(type, date_list) {
     list(norm_number, norm_update, norm_title, norm_link)
   })
 }
+
+retry_request <- function(df, type, missing) {
+  missing_dates <- missing %>% {row.names(df[.,])}
+  request_norm_dates(type, missing_dates)
+}

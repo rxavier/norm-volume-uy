@@ -40,10 +40,26 @@ data <- request_norm_dates(type_norm, dates_url)
 flat_df_laws <- cbind.data.frame(unlist(data[1, ]), unlist(data[2, ]), unlist(data[3, ]), unlist(data[4, ]), "Law") %>%
   `colnames<-` (c("Number", "Type2", "Text", "URL", "Type1"))
 
+missing_laws <- which(is.na(flat_df_laws$Number), arr.ind=TRUE)
+if (length(missing_laws) > 0) {
+  complete_laws <- retry_request(flat_df_laws, type_norm, missing_laws) %>%
+  {cbind.data.frame(unlist(.[1, ]), unlist(.[2, ]), unlist(.[3, ]), unlist(.[4, ]), "Law")} %>%
+    `colnames<-` (c("Number", "Type2", "Text", "URL", "Type1"))
+  flat_df_laws <- rbind.data.frame(flat_df_laws[!is.na(flat_df_laws$Number), ], complete_laws)
+}
+  
 type_norm <- type_norm_vec["Decrees"]
 data <- request_norm_dates(type_norm, dates_url)
 flat_df_decrees <- cbind.data.frame(unlist(data[1, ]), unlist(data[2, ]), unlist(data[3, ]), unlist(data[4, ]), "Decree") %>%
   `colnames<-` (c("Number", "Type2", "Text", "URL", "Type1"))
+
+missing_decrees <- which(is.na(flat_df_decrees$Number), arr.ind=TRUE)
+if (length(missing_decrees) > 0) {
+  complete_decrees <- retry_request(flat_df_decrees, type_norm, missing_decrees) %>%
+  {cbind.data.frame(unlist(.[1, ]), unlist(.[2, ]), unlist(.[3, ]), unlist(.[4, ]), "Decree")} %>%
+    `colnames<-` (c("Number", "Type2", "Text", "URL", "Type1"))
+  flat_df_decrees <- rbind.data.frame(flat_df_decrees[!is.na(flat_df_decrees$Number), ], complete_decrees)
+}
 
 flat_df <- rbind.data.frame(flat_df_laws, flat_df_decrees)
 flat_df["month"] <- rownames(flat_df) %>% str_extract_all("(?<=fechapro2=)[0-9%F]+") %>%
