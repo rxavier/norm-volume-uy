@@ -49,5 +49,6 @@ request_norm_dates <- function(type, dates) {
 
 retry_request <- function(df, type, missing) {
   missing_dates <- missing %>% {row.names(df[.,])}
-  request_norm_dates(type, missing_dates)
+  complete <- request_norm_dates(type, missing_dates)
+  rbind.data.frame(df[!is.na(df$Number), ], complete)
 }

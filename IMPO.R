@@ -36,22 +36,20 @@ dates_url <- paste0("&fechapro1=", str_replace_all(format(date_df$Start, "%d-%m-
 
 # Run function for laws and decrees
 type_norm <- type_norm_vec["Laws"]
-flat_df_laws <- request_norm_dates(type_norm, dates_url)
-missing_laws <- which(is.na(flat_df_laws$Number), arr.ind=TRUE)
+df_laws <- request_norm_dates(type_norm, dates_url)
+missing_laws <- which(is.na(df_laws$Number), arr.ind=TRUE)
 if (length(missing_laws) > 0) {
-  complete_laws <- retry_request(flat_df_laws, type_norm, missing_laws)
-  flat_df_laws <- rbind.data.frame(flat_df_laws[!is.na(flat_df_laws$Number), ], complete_laws)
+  df_laws_comp <- retry_request(df_laws, type_norm, missing_laws)
 }
   
 type_norm <- type_norm_vec["Decrees"]
-flat_df_decrees <- request_norm_dates(type_norm, dates_url)
-missing_decrees <- which(is.na(flat_df_decrees$Number), arr.ind=TRUE)
+df_decrees <- request_norm_dates(type_norm, dates_url)
+missing_decrees <- which(is.na(df_decrees$Number), arr.ind=TRUE)
 if (length(missing_decrees) > 0) {
-  complete_decrees <- retry_request(flat_df_decrees, type_norm, missing_decrees)
-  flat_df_decrees <- rbind.data.frame(flat_df_decrees[!is.na(flat_df_decrees$Number), ], complete_decrees)
+  df_decrees_comp <- retry_request(df_decrees, type_norm, missing_decrees)
 }
 
-flat_df <- rbind.data.frame(flat_df_laws, flat_df_decrees)
-flat_df["month"] <- rownames(flat_df) %>% str_extract_all("(?<=fechapro2=)[0-9%F]+") %>%
+df_comp <- rbind.data.frame(df_laws_comp, df_decrees_comp)
+df_comp["month"] <- rownames(df_comp) %>% str_extract_all("(?<=fechapro2=)[0-9%F]+") %>%
   str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
-flat_df_nodup <- flat_df[!duplicated(flat_df[, 1]), ] %>% `rownames<-` (NULL)
+df_comp_nodupl <- df_comp[!duplicated(df_comp[, 1]), ] %>% `rownames<-` (NULL)
