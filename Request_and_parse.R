@@ -8,7 +8,7 @@ request_norm_dates <- function(type, date_list) {
   else {number_docs <- 10}
   
   sapply(date_list, function(x) {
-    month <- str_extract_all(x, "(?<=fechadiar2=)[0-9%F]+") %>% str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
+    month <- str_extract_all(x, "(?<=fechapro2=)[0-9%F]+") %>% str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
     url <- paste0(impo_url, suffix0, number_docs, "&combo1=", type, suffix1, x, suffix2)
     request_html <- GET(url, add_headers(headers)) %>% read_html()
     check1 <- html_nodes(request_html, ".contenido a") %>% html_text() %>% trimws() %>% toString()
