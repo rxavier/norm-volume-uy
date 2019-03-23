@@ -7,7 +7,7 @@ request_norm_dates <- function(type, dates) {
     number_docs <- 150}
   else {number_docs <- 10}
   
-  sapply(dates, function(x) {
+  data <- sapply(dates, function(x) {
     month <- str_extract_all(x, "(?<=fechapro2=)[0-9%F]+") %>% str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
     url <- paste0(impo_url, suffix0, number_docs, "&combo1=", type, suffix1, x, suffix2)
     request_html <- GET(url, add_headers(headers)) %>% read_html()
@@ -43,6 +43,8 @@ request_norm_dates <- function(type, dates) {
       list(norm_number, norm_update, norm_title, norm_link)},
       error=function(e) list(NA, NA, NA, NA))
   })
+  return(cbind.data.frame(unlist(data[1, ]), unlist(data[2, ]), unlist(data[3, ]), unlist(data[4, ]), "Law") %>%
+           `colnames<-` (c("Number", "Type2", "Text", "URL", "Type1")))
 }
 
 retry_request <- function(df, type, missing) {
