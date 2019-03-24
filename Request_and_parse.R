@@ -50,5 +50,6 @@ request_norm_dates <- function(type, dates) {
 retry_request <- function(df, type, missing) {
   missing_dates <- missing %>% {row.names(df[.,])}
   complete <- request_norm_dates(type, missing_dates)
-  rbind.data.frame(df[!is.na(df$Number), ], complete)
+  if (sum(is.na(complete)) == 0) rbind.data.frame(df[!is.na(df$Number), ], complete)
+  else {print("Failed to request every missing date")}
 }
