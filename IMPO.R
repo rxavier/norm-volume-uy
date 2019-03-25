@@ -40,14 +40,14 @@ df_laws <- request_norm_dates(type_norm, dates_url)
 missing_laws <- which(is.na(df_laws$Number), arr.ind=TRUE)
 if (length(missing_laws) > 0) {
   df_laws_comp <- retry_request(df_laws, type_norm, missing_laws)
-}
+  } else {df_laws_comp <- df_laws}
   
 type_norm <- type_norm_vec["Decrees"]
 df_decrees <- request_norm_dates(type_norm, dates_url)
 missing_decrees <- which(is.na(df_decrees$Number), arr.ind=TRUE)
 if (length(missing_decrees) > 0) {
   df_decrees_comp <- retry_request(df_decrees, type_norm, missing_decrees)
-}
+  } else {df_decrees_comp <- df_decrees}
 
 df_comp <- rbind.data.frame(df_laws_comp, df_decrees_comp)
 df_comp["month"] <- rownames(df_comp) %>% str_extract_all("(?<=fechapro2=)[0-9%F]+") %>%
