@@ -43,7 +43,7 @@ request_norm_dates <- function(type, dates) {
       list(norm_number, norm_update, norm_title, norm_link)},
       error=function(e) list(NA, NA, NA, NA))
   })
-  return(cbind.data.frame(unlist(data[1, ]), unlist(data[2, ]), unlist(data[3, ]), unlist(data[4, ]), "Law") %>%
+  return(cbind.data.frame(unlist(data[1, ]), unlist(data[2, ]), unlist(data[3, ]), unlist(data[4, ]), names(type)) %>%
            `colnames<-` (c("Number", "Type2", "Text", "URL", "Type1")))
 }
 
