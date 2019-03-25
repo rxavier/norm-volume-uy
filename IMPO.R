@@ -53,4 +53,4 @@ df_comp <- rbind.data.frame(df_laws_comp, df_decrees_comp, stringsAsFactors=F) %
   {.[!(.$Text==""), ]}
 df_comp["month"] <- rownames(df_comp) %>% str_extract_all("(?<=fechapro2=)[0-9%F]+") %>%
   str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
-df_comp_nodupl <- df_comp[!duplicated(df_comp[, 1]), ] %>% `rownames<-` (NULL)
+df_comp_nodupl <- df_comp[!duplicated(df_comp[, 1]) | !duplicated(df_comp[, 6]), ] %>% `rownames<-` (NULL)
