@@ -20,13 +20,13 @@ request_norm_dates <- function(type, dates) {
       print(paste0(format(month, "%m-%Y"), ": URL refreshed"))}
     else if (check2 == nodoc_msg) {
       print(paste0(format(month, "%m-%Y"), ": no ",
-                   tolower(names(type_norm)[which(type_norm==type)]), " found"))
+                   tolower(names(type)), " found"))
       return(list("..", "..", "..", ".."))}
     
     tryCatch({
       number_docs_effective <- (html_nodes(request_html, "#divMsg b") %>% html_text() %>% trimws())[1]
       print(paste0(format(month, "%m-%Y"),": ", number_docs_effective, " ",
-                   tolower(names(type_norm)[which(type_norm==type)]), " found"))
+                   tolower(names(type)), " found"))
       
       if (number_docs_effective>=number_docs) {
         url <- paste0(impo_url, suffix0, number_docs_effective, "&combo1=", type, suffix1, x, suffix2)
