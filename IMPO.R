@@ -49,7 +49,7 @@ if (length(missing_decrees) > 0) {
   df_decrees_comp <- retry_request(df_decrees, type_norm, missing_decrees)
   } else {df_decrees_comp <- df_decrees}
 
-df_comp <- rbind.data.frame(df_laws_comp, df_decrees_comp)
+df_comp <- rbind.data.frame(df_laws_comp, df_decrees_comp, stringsAsFactors=F)
 df_comp["month"] <- rownames(df_comp) %>% str_extract_all("(?<=fechapro2=)[0-9%F]+") %>%
   str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
 df_comp_nodupl <- df_comp[!duplicated(df_comp[, 1]), ] %>% `rownames<-` (NULL)
