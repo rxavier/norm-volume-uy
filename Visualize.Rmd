@@ -1,0 +1,74 @@
+---
+title: "Explore laws and decrees for Uruguay since 1985"
+author: "Rafael Xavier"
+date: "3/25/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(magrittr)
+library(stringr)
+opts_chunk$set(echo = TRUE, tidy=TRUE)
+```
+
+## Introduction
+
+The idea behind this project is to analyze legislative and executive monthly productivity in Uruguay in the post-dictatorship years, i.e, from 1985 onwards. I get the data from the [IMPO](https://www.impo.com.uy/cgi-bin/bases/consultaBasesBS.cgi?tipoServicio=3) website, which has a very nice search engine.
+
+There's no public-facing API but I managed to figure out how search parameters are sent to the server by looking at the Chrome developer tools pane. After figuring that out, I had to automate requests month by month because no dates are displayed after making a query, making it impossible to know when a particular law or decree was approved. This is a fairly tedious process because each monthly request takes several seconds and can be particularly slow for months with a large number of documents.
+
+This is all done in the [Get_data.R](https://github.com/rmxavier/volnormativo/blob/IMPO/Get_data.R) script, which produces a nice looking dataframe and outputs it to a .csv file. The data contains every decree and law with its number, title and URL, and the month they correspond to. Months for which no documents were found were set to "..".
+
+```{r}
+data <- read.csv("Data/Data_1985_2018.csv", colClasses=c("Date", rep("character", 5)))
+head(data) %>% kable()
+```
+
+## Getting rid of useless norms
+
+Not every law and decree matters. Government approves all sort of norms that don't really reflect a significant amount of work. Let's take a jab at that.
+
+The following code takes titles, separates them into words, removes punctuation and years and calculates the frequency for each, saving them as an sorted dataframe containing words longer than 3 letters and their frequencies.
+
+```{r}
+## Separate every string into words, remove some punctuation and years, calculate frequency
+wordfreq <- str_split(data$Title," ") %>% 
+  {str_remove_all(unlist(.),"\\.(?![A-Z])|[\",]|[0-9]{4}")} %>%
+  {table(unlist(.))}
+
+## Create dataframe based on words and frequencies and order according to frequency
+wdf <- names(wordfreq) %>% str_remove_all("\\s+") %>%
+  cbind.data.frame(as.integer(wordfreq),stringsAsFactors=F) 
+colnames(wdf) <- c("Word","Frequency")
+wdf <- subset(wdf,str_length(as.character(wdf$Word))>3)
+wdf <- wdf[order(-wdf$Frequency),]
+head(wdf) %>% kable()
+```
+
+If you are somewhat familiar with the Uruguayan legal system you'll recognize words associated with "business as usual" laws and decrees. For example, the Executive branch's approval of collecting bargaining deals and setting the value of stuff like Unidades Reajustables which are used as a base for calculating fines.
+
+Let's check some of these.
+
+```{r}
+## Get the words that are repeated more than 100 times and sample 10 norms that match each
+samples <- sum(wdf$Frequency>99) %>% {unlist(wdf[1:., 1])} %>% paste0("\\b", ., "\\b") %>% 
+  sapply(function(x) str_subset(data$Title, x) %>% sample(10))
+colnames(samples) <- wdf[1:ncol(samples), 1]
+samples[1:3, 1:5] %>% kable()
+```
+
+So there's a lot of junk but there's also some that we want to keep. I've created a vector of words associated with norms that I'm not interested in counting. To be honest, I'm obviously missing a lot of stuff and including stuff that should be kept.
+
+```{r}
+exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUSTABLE",
+             "U.R.","UR","U.R.A.","URA","Se fija","Se actualiza","SUSCRITO",
+             "ANEXO","DESIGNA", "DESIGNACION","ESCUELA","PARTIDAS","COMISION", "MERCOSUR",
+             "MERCADO COMUN","EMISION","SALARIO MINIMO NACIONAL",
+             "MONTO MINIMO DE LAS JUBILACIONES","INTERES NACIONAL",
+             "COMPLEMENTACION","COOPERACION") %>% {paste0("\\b",. , "\\b", collapse="|")}
+pruned.data <- data[!str_detect(data$Title, regex(exclude, ignore_case=TRUE)), ]
+print(paste0("Dropped norms: ", length(data$Title), " - ", length(pruned.data$Title), " = ", length(data$Title)-length(pruned.data$Title)))
+```
+
+That's a large number of dropped laws and decrees, almost 30%.
