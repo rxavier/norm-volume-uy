@@ -51,9 +51,10 @@ if (length(missing_decrees) > 0) {
 
 # Bind laws and decrees dataframes, add dates, drop duplicates and export to .csv
 df_comp <- rbind.data.frame(df_laws_comp, df_decrees_comp, stringsAsFactors=F) %>% 
-  {.[!(.$Text==""), ]}
-df_comp["month"] <- rownames(df_comp) %>% str_extract_all("(?<=fechapro2=)[0-9%F]+") %>%
+  {.[!(.$Title==""), ]}
+df_comp["Month"] <- rownames(df_comp) %>% str_extract_all("(?<=fechapro2=)[0-9%F]+") %>%
   str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
-df_comp_nodupl <- df_comp[!duplicated(df_comp[, 1]) | !duplicated(df_comp[, 6]), ] %>% `rownames<-` (NULL)
+df_comp_nodupl <- df_comp[!duplicated(df_comp[, 1]) | !duplicated(df_comp[, 6]), ] %>% 
+{.[order(.$Type, .$Month), ]} %>% `rownames<-` (NULL)
 
 write.csv(df_comp_nodupl, "Data/Data_1985_2018.csv")
