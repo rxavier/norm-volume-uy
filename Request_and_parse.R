@@ -51,7 +51,7 @@ request_norm_dates <- function(type, dates) {
   })
   return(cbind.data.frame(unlist(data[1, ]), unlist(data[2, ]), unlist(data[3, ]), 
                           unlist(data[4, ]), names(type), stringsAsFactors=F) %>%
-           `colnames<-` (c("Number", "Type2", "Text", "URL", "Type1")))
+           `colnames<-` (c("Number", "Type2", "Title", "URL", "Type")))
 }
 
 # Retry function for dates that failed for unforeseen reasons
