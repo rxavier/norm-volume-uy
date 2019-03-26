@@ -26,8 +26,8 @@ headers <- c("Accept"="text/html,application/xhtml+xml,application/xml;q=0.9,ima
              "User-Agent"="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36")
 
 # Create start and end dates to be used in each function call
-date_pub_start <- "01-12-2018" %>% as.Date("%d-%m-%Y")
-date_pub_end <- "01-01-2019" %>% as.Date("%d-%m-%Y")
+date_pub_start <- "01-01-1985" %>% as.Date("%d-%m-%Y")
+date_pub_end <- "01-12-2018" %>% as.Date("%d-%m-%Y")
 date_df <- as.data.frame(as.Date(seq(as.yearmon(date_pub_start), as.yearmon(date_pub_end), by=1/12), frac=1)) %>%
   `colnames<-` ("End")
 date_df$Start <- date_df$End-as.POSIXlt(date_df$End)$mday + 1
@@ -54,3 +54,5 @@ df_comp <- rbind.data.frame(df_laws_comp, df_decrees_comp, stringsAsFactors=F) %
 df_comp["month"] <- rownames(df_comp) %>% str_extract_all("(?<=fechapro2=)[0-9%F]+") %>%
   str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
 df_comp_nodupl <- df_comp[!duplicated(df_comp[, 1]) | !duplicated(df_comp[, 6]), ] %>% `rownames<-` (NULL)
+
+write.csv(df_comp_nodupl, "Data_1985_2018.csv")
