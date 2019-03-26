@@ -49,6 +49,7 @@ if (length(missing_decrees) > 0) {
   df_decrees_comp <- retry_request(df_decrees, type_norm, missing_decrees)
   } else {df_decrees_comp <- df_decrees}
 
+# Bind laws and decrees dataframes, add dates, drop duplicates and export to .csv
 df_comp <- rbind.data.frame(df_laws_comp, df_decrees_comp, stringsAsFactors=F) %>% 
   {.[!(.$Text==""), ]}
 df_comp["month"] <- rownames(df_comp) %>% str_extract_all("(?<=fechapro2=)[0-9%F]+") %>%
