@@ -56,4 +56,4 @@ df_comp["month"] <- rownames(df_comp) %>% str_extract_all("(?<=fechapro2=)[0-9%F
   str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
 df_comp_nodupl <- df_comp[!duplicated(df_comp[, 1]) | !duplicated(df_comp[, 6]), ] %>% `rownames<-` (NULL)
 
-write.csv(df_comp_nodupl, "Data_1985_2018.csv")
+write.csv(df_comp_nodupl, "Data/Data_1985_2018.csv")
