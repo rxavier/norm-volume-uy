@@ -55,6 +55,7 @@ df_comp <- rbind.data.frame(df_laws_comp, df_decrees_comp, stringsAsFactors=F) %
 df_comp["Month"] <- rownames(df_comp) %>% str_extract_all("(?<=fechapro2=)[0-9%F]+") %>%
   str_replace_all("%2F", "-") %>% as.Date("%d-%m-%Y")
 df_comp_nodupl <- df_comp[!duplicated(df_comp[, 1]) | !duplicated(df_comp[, 6]), ] %>% 
-{.[order(.$Type, .$Month), ]} %>% `rownames<-` (NULL)
+{.[order(.$Type, .$Month), ]} %>% 
+  {.[, c("Month", "Type", "Number", "Title", "Type2", "URL")]} %>%`rownames<-` (NULL)
 
 write.csv(df_comp_nodupl, "Data/Data_1985_2018.csv")
