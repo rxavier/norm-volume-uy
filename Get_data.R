@@ -41,20 +41,14 @@ dates_url <- function(start_date, end_date) {
          "&fechapro2=", str_replace_all(format(date_df$End, "%d-%m-%Y"),"-","%2F"))
 }
 
-# Run function for laws and decrees
-
-df_laws <- request_norm_dates(type_norm, dates_url)
-missing_laws <- which(is.na(df_laws$Number), arr.ind=TRUE)
-if (length(missing_laws) > 0) {
-  df_laws_comp <- retry_request(df_laws, type_norm, missing_laws)
-  } else {df_laws_comp <- df_laws}
-  
-type_norm <- type_norm_vec["Decree"]
-df_decrees <- request_norm_dates(type_norm, dates_url)
-missing_decrees <- which(is.na(df_decrees$Number), arr.ind=TRUE)
-if (length(missing_decrees) > 0) {
-  df_decrees_comp <- retry_request(df_decrees, type_norm, missing_decrees)
-  } else {df_decrees_comp <- df_decrees}
+# Function for producting dataframes per norm type
+df_norms <- function(type, dates_url) {
+  df_aux <- request_norm_dates(type, dates_url)
+  missing <- which(is.na(df_aux$Number), arr.ind=TRUE)
+  if (length(missing_laws) > 0) {
+    df_norms_comp <- retry_request(df_aux, type, missing)
+  } else {df_norms_comp <- df_aux}
+}
 
 # Bind laws and decrees dataframes, add dates, drop duplicates and export to .csv
 df_comp <- rbind.data.frame(df_laws_comp, df_decrees_comp, stringsAsFactors=F) %>% 
