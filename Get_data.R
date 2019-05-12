@@ -9,9 +9,9 @@ source('Request_and_parse.R')
 # Set defaults and initial values
 impo_url <- "https://www.impo.com.uy"
 suffix0 <- "/cgi-bin/bases/consultaBasesBS.cgi?tipoServicio=3&realizarconsulta=SI&nuevaconsulta=SI&parlistabases=&nrodocdesdehasta=0-"
-type_norm_vec <- c("Laws"=5, "Decrees"=6, "Resolutions"=7, "Rules"=11)
 suffix1 <- "&numeros=&articulos=&textolibre=&texto1=&campotexto1=TODOS&optexto1=Y&texto2=&campotexto2=TODOS&optexto2=Y&texto3=&campotexto3=TODOS"
 suffix2 <- "&fechadiar1=&fechadiar2=&comboBaseTematica=&indexcombobasetematica=0&tema=&nvocabulario=&refinar="
+
 refresh_msg <- "Haga clic aqui para ingresar nuevamente al sistema."
 nodoc_msg <- "Su búsqueda no produjo ningún documento."
 headers <- c("Accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
@@ -24,6 +24,8 @@ headers <- c("Accept"="text/html,application/xhtml+xml,application/xml;q=0.9,ima
              "Host"="www.impo.com.uy",
              "Upgrade-Insecure-Requests"="1",
              "User-Agent"="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36")
+
+type_norm_vec <- c("Law"=5, "Decree"=6, "Resolution"=7, "Rule"=11)
 
 # Create start and end dates to be used in each function call
 date_pub_start <- "01-01-1985" %>% as.Date("%d-%m-%Y")
