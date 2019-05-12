@@ -37,14 +37,14 @@ dates_url <- paste0("&fechapro1=", str_replace_all(format(date_df$Start, "%d-%m-
                     "&fechapro2=", str_replace_all(format(date_df$End, "%d-%m-%Y"),"-","%2F"))
 
 # Run function for laws and decrees
-type_norm <- type_norm_vec["Laws"]
+type_norm <- type_norm_vec["Law"]
 df_laws <- request_norm_dates(type_norm, dates_url)
 missing_laws <- which(is.na(df_laws$Number), arr.ind=TRUE)
 if (length(missing_laws) > 0) {
   df_laws_comp <- retry_request(df_laws, type_norm, missing_laws)
   } else {df_laws_comp <- df_laws}
   
-type_norm <- type_norm_vec["Decrees"]
+type_norm <- type_norm_vec["Decree"]
 df_decrees <- request_norm_dates(type_norm, dates_url)
 missing_decrees <- which(is.na(df_decrees$Number), arr.ind=TRUE)
 if (length(missing_decrees) > 0) {
