@@ -28,13 +28,18 @@ headers <- c("Accept"="text/html,application/xhtml+xml,application/xml;q=0.9,ima
 type_norm_vec <- c("Law"=5, "Decree"=6, "Resolution"=7, "Rule"=11)
 
 # Create start and end dates to be used in each function call
-date_pub_start <- "01-01-1985" %>% as.Date("%d-%m-%Y")
-date_pub_end <- "01-12-2018" %>% as.Date("%d-%m-%Y")
-date_df <- as.data.frame(as.Date(seq(as.yearmon(date_pub_start), as.yearmon(date_pub_end), by=1/12), frac=1)) %>%
-  `colnames<-` ("End")
-date_df$Start <- date_df$End-as.POSIXlt(date_df$End)$mday + 1
-dates_url <- paste0("&fechapro1=", str_replace_all(format(date_df$Start, "%d-%m-%Y"),"-","%2F"),
-                    "&fechapro2=", str_replace_all(format(date_df$End, "%d-%m-%Y"),"-","%2F"))
+dates_url <- function(start_date, end_date) {
+  
+  date_pub_start <- start_date %>% as.Date("%d-%m-%Y")
+  date_pub_end <- end_date %>% as.Date("%d-%m-%Y")
+  
+  date_df <- as.data.frame(as.Date(seq(as.yearmon(date_pub_start), as.yearmon(date_pub_end), by=1/12), frac=1)) %>%
+    `colnames<-` ("End")
+  date_df$Start <- date_df$End-as.POSIXlt(date_df$End)$mday + 1
+  
+  paste0("&fechapro1=", str_replace_all(format(date_df$Start, "%d-%m-%Y"),"-","%2F"),
+         "&fechapro2=", str_replace_all(format(date_df$End, "%d-%m-%Y"),"-","%2F"))
+}
 
 # Run function for laws and decrees
 type_norm <- type_norm_vec["Law"]
