@@ -42,7 +42,7 @@ dates_url <- function(start_date, end_date) {
 }
 
 # Run function for laws and decrees
-type_norm <- type_norm_vec["Law"]
+
 df_laws <- request_norm_dates(type_norm, dates_url)
 missing_laws <- which(is.na(df_laws$Number), arr.ind=TRUE)
 if (length(missing_laws) > 0) {
