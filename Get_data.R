@@ -1,7 +1,4 @@
-library(httr)
-library(rvest)
 library(stringr)
-library(zoo)
 
 # Load function
 source('Request_and_parse.R')
