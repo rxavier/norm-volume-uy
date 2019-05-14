@@ -25,7 +25,8 @@ df_norms <- function(type, start, end, date_format="%d-%m-%Y", write=FALSE) {
   {.[!(.$Title==""), ]} %>% `rownames<-` (NULL)
   
   if (write==TRUE) {
-    write.csv(df_comp_nodupl, paste0("Data/", type, "_", start, "_", end, ".csv"), row.names=FALSE)}
+    write.csv(df_comp_nodupl, paste0("Data/", type, "_", df_comp_nodupl$Month[1], "_",
+                                     df_comp_nodupl$Month[nrow(df_comp_nodupl)], ".csv"), row.names=FALSE)}
   
   return(df_comp_nodupl)
 }
@@ -40,7 +41,8 @@ update_request <- function(df, type, end, date_format="%d-%m-%Y", write=FALSE) {
   df_comp_nodupl <- rbind.data.frame(df, df_update, stringsAsFactors=F)
   
   if (write==TRUE) {
-    write.csv(df_comp_nodupl, paste0("Data/", type, "_", start, "_", end, ".csv"), row.names=FALSE)}
+    write.csv(df_comp_nodupl, paste0("Data/", type, "_", df_comp_nodupl$Month[1], "_",
+                                     df_comp_nodupl$Month[nrow(df_comp_nodupl)], ".csv"), row.names=FALSE)}
   
   return(df_comp_nodupl)
 }
