@@ -35,7 +35,7 @@ df_norms <- function(type, start, end, date_format="%d-%m-%Y", write=FALSE) {
 # Update function
 update_request <- function(df, type, end, date_format="%d-%m-%Y", write=FALSE) {
   
-  start <- df[order(df$Month), ] %>% .[nrow(.), 1] + 1
+  start <- df[order(df$Month), ] %>% .[[nrow(.), 1]] + 1
   
   df_update <- df_norms(type, start, end, date_format=date_format, write=FALSE)
   df_comp_nodupl <- rbind.data.frame(df, df_update, stringsAsFactors=F)
