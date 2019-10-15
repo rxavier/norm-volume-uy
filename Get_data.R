@@ -32,7 +32,7 @@ df_norms <- function(type, start, end, date_format="%d-%m-%Y", write=FALSE) {
 # Update function ------------
 update_request <- function(df, type, end, date_format="%d-%m-%Y", write=FALSE) {
   
-# Update function
+  df$Month <- as.Date(df$Month)
   
   start <- df[order(df$Month), ] %>% .[[nrow(.), 1]] + 1
   
