@@ -1,9 +1,7 @@
 library(stringr)
-
-# Load functions
 source('Request_and_parse.R')
 
-# Produce dataframe for specified norm between dates
+# Produce dataframe for specified norm between dates ------------
 df_norms <- function(type, start, end, date_format="%d-%m-%Y", write=FALSE) {
   
   dates <- dates_url(start_date=start, end_date=end, date_format=date_format)
@@ -31,9 +29,10 @@ df_norms <- function(type, start, end, date_format="%d-%m-%Y", write=FALSE) {
   return(df_comp_nodupl)
 }
 
-
-# Update function
+# Update function ------------
 update_request <- function(df, type, end, date_format="%d-%m-%Y", write=FALSE) {
+  
+# Update function
   
   start <- df[order(df$Month), ] %>% .[[nrow(.), 1]] + 1
   
@@ -46,6 +45,3 @@ update_request <- function(df, type, end, date_format="%d-%m-%Y", write=FALSE) {
   
   return(df_comp_nodupl)
 }
-
-# Bind laws and decrees dataframes, add dates, drop duplicates and export to .csv
-df_comp <- rbind.data.frame(df_laws_comp, df_decrees_comp, stringsAsFactors=F) 

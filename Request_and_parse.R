@@ -2,7 +2,7 @@ library(httr)
 library(rvest)
 library(zoo)
 
-# Set defaults and initial values
+# Set defaults and initial values ------------
 impo_url <- "https://www.impo.com.uy"
 suffix0 <- "/cgi-bin/bases/consultaBasesBS.cgi?tipoServicio=3&realizarconsulta=SI&nuevaconsulta=SI&parlistabases=&nrodocdesdehasta=0-"
 suffix1 <- "&numeros=&articulos=&textolibre=&texto1=&campotexto1=TODOS&optexto1=Y&texto2=&campotexto2=TODOS&optexto2=Y&texto3=&campotexto3=TODOS"
@@ -24,7 +24,7 @@ headers <- c("Accept"="text/html,application/xhtml+xml,application/xml;q=0.9,ima
 type_norm_vec <- c("law"=5, "decree"=6, "resolution"=7, "rule"=11)
 
 
-# Dates vector function
+# Dates vector function ------------
 dates_url <- function(start_date, end_date, date_format) {
   
   date_pub_start <- start_date %>% as.Date(date_format)
@@ -39,7 +39,7 @@ dates_url <- function(start_date, end_date, date_format) {
 }
 
 
-# Base function
+# Base function ------------
 request_norm_dates <- function(type, dates) {
   
   type_num <- type_norm_vec[type]
@@ -104,7 +104,7 @@ request_norm_dates <- function(type, dates) {
 }
 
 
-# Retry function for dates that failed for unforeseen reasons
+# Retry function for dates that failed for unforeseen reasons ------------
 retry_request <- function(df, type, missing) {
   
   complete <- request_norm_dates(type, missing)
