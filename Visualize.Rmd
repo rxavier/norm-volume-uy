@@ -16,7 +16,7 @@ library(stopwords)
 library(wordcloud2)
 library(seasonal)
 library(ggplot2)
-opts_chunk$set(echo = TRUE, tidy=TRUE)
+opts_chunk$set(echo = TRUE, tidy = TRUE)
 ```
 
 ## Introduction
@@ -25,14 +25,16 @@ The idea behind this project is to analyze legislative and executive monthly pro
 
 There's no public-facing API but I managed to figure out how search parameters are sent to the server by looking at the Chrome developer tools pane. After figuring that out, I had to automate requests month by month because no dates are displayed after making a query, making it impossible to know when a particular law or decree was approved. This is a fairly tedious process because each monthly request takes several seconds and can be particularly slow for months with a large number of documents.
 
-This is all done in the [Get_data.R](https://github.com/rmxavier/volnormativo/blob/IMPO/Get_data.R) script, which produces a nice looking dataframe and outputs it to a .csv file. The data contains every decree and law with its number, title and URL, and the month they correspond to. Months for which no documents were found were set to "..".
+This is all done in the [Get_data.R](https://github.com/rxavier/volnormativo/blob/IMPO/Get_data.R) script, which produces a nice looking dataframe and outputs it to a .csv file. The data contains every decree and law with its number, title and URL, and the month they correspond to. Months for which no documents were found were set to "..".
 
 ```{r}
-laws <- read.csv(list.files("Data/", pattern="law", full.names=TRUE), colClasses=c("Date", rep("character", 5)))
-decrees <- read.csv(list.files("Data/", pattern="decree", full.names=TRUE), colClasses=c("Date", rep("character", 5)))
-data <- rbind.data.frame(laws, decrees, stringsAsFactors=F)
-data[, 3:6][data[, 3:6]==".."] <- NA
-head(data) %>% kable() %>% kable_styling()
+laws <- read.csv(list.files("Data/", pattern = "law", full.names = TRUE), colClasses = c("Date", rep("character", 5)))
+decrees <- read.csv(list.files("Data/", pattern = "decree", full.names = TRUE), colClasses = c("Date", rep("character", 5)))
+data <- rbind.data.frame(laws, decrees, stringsAsFactors = F)
+data[, 3:6][data[, 3:6] == ".."] <- NA
+head(data) %>%
+  kable() %>%
+  kable_styling()
 ```
 
 ## Getting rid of useless norms
@@ -43,72 +45,146 @@ The following code takes titles, separates them into words, removes punctuation 
 
 ```{r}
 ## Separate every string into words, remove some punctuation and years, calculate frequency
-words_df <- tokenize_words(unlist(data$Title), stopwords=stopwords("es")) %>% unlist() %>% as.data.frame(stringsAsFactors=FALSE) %>% `colnames<-`(c("Words"))
+words_df <- tokenize_words(unlist(data$Title), stopwords = stopwords("es")) %>%
+  unlist() %>%
+  as.data.frame(stringsAsFactors = FALSE) %>%
+  `colnames<-`(c("Words"))
 
-words_freq <- words_df %>% group_by(Words) %>% summarise(Freq=n()) %>% filter(!Words %in% c("n", "ley", "decreto", "reglamentacion", "nº", "art")) %>% arrange(desc(Freq))
+words_freq <- words_df %>%
+  group_by(Words) %>%
+  summarise(Freq = n()) %>%
+  filter(!Words %in% c("n", "ley", "decreto", "reglamentacion", "nº", "art")) %>%
+  arrange(desc(Freq))
 
-wordcloud2(words_freq[1:100, ], minRotation=-pi/2, maxRotation=-pi/2, color="random-dark", fontFamily="Helvetica", fontWeight="normal", size=.4)
+wordcloud2(words_freq, minRotation = -pi / 2, maxRotation = -pi / 2, color = "random-dark", fontFamily = "Helvetica", fontWeight = "normal", size = .4)
 ```
 
-If you are somewhat familiar with the Uruguayan legal system you'll recognize words associated with "business as usual" laws and decrees. For example, the Executive branch's approval of collecting bargaining deals and setting the value of stuff like Unidades Reajustables which are used as a base for calculating fines.
+If you are somewhat familiar with the Uruguayan legal system you'll recognize words associated with "business as usual" laws and decrees. For example, the Executive branch's approval of collective bargaining deals and setting the value of indexes.
 
 Let's check some of these.
 
 ```{r}
 ## Get the words that are repeated more than 100 times and sample 10 norms that match each
-sample_norms <- words_freq %>% filter(Freq >= 500) %>% select(Words) %>% unlist() %>% paste0("\\b", ., "\\b") %>% sapply(function(x) str_subset(data$Title, regex(x, ignore_case=TRUE)) %>% sample(10))
+sample_norms <- words_freq %>%
+  filter(Freq >= 500) %>%
+  select(Words) %>%
+  unlist() %>%
+  paste0("\\b", ., "\\b") %>%
+  sapply(function(x) str_subset(data$Title, regex(x, ignore_case = TRUE)) %>% sample(10))
 colnames(sample_norms) <- words_freq[1:ncol(sample_norms), 1] %>% unlist()
-sample_norms[1:3, sample(ncol(sample_norms), 3)] %>% kable() %>% kable_styling()
+sample_norms[1:3, sample(ncol(sample_norms), 3)] %>%
+  kable() %>%
+  kable_styling()
 ```
 
 So there's a lot of junk but there's also some that we want to keep. I've created a vector of words associated with norms that I'm not interested in counting. To be honest, I'm obviously missing a lot of stuff and including stuff that should be kept.
 
 ```{r}
-exclude <- c("SUBGRUPO","GRUPO","CONVENIO","ACUERDO","COLECTIVO","UNIDAD REAJUSTABLE",
-             "U.R.","UR","U.R.A.","URA","Se fija","Se actualiza","SUSCRITO",
-             "ANEXO","DESIGNA", "DESIGNACION","ESCUELA","PARTIDAS","COMISION", "MERCOSUR",
-             "MERCADO COMUN","EMISION","SALARIO MINIMO NACIONAL",
-             "MONTO MINIMO DE LAS JUBILACIONES","INTERES NACIONAL",
-             "COMPLEMENTACION","COOPERACION") %>% {paste0("\\b",. , "\\b", collapse="|")}
+exclude <- c(
+  "SUBGRUPO", "GRUPO", "CONVENIO", "ACUERDO", "COLECTIVO", "UNIDAD REAJUSTABLE",
+  "U.R.", "UR", "U.R.A.", "URA", "Se fija", "Se actualiza", "SUSCRITO",
+  "ANEXO", "DESIGNA", "DESIGNACION", "ESCUELA", "PARTIDAS", "COMISION", "MERCOSUR",
+  "MERCADO COMUN", "EMISION", "SALARIO MINIMO NACIONAL",
+  "MONTO MINIMO DE LAS JUBILACIONES", "INTERES NACIONAL",
+  "COMPLEMENTACION", "COOPERACION", "FIJACION"
+) %>% {
+  paste0("\\b", ., "\\b", collapse = "|")
+}
 
 pruned_data <- data %>% filter(!grepl(exclude, Title))
 
-print(paste0("Dropped norms: ", nrow(data), " - ", nrow(pruned_data), " = ", nrow(data)-nrow(pruned_data)))
+print(paste0("Dropped norms: ", nrow(data), " - ", nrow(pruned_data), " = ", nrow(data) - nrow(pruned_data)))
 ```
 
-That's a large number of dropped laws and decrees, almost 30%.
+That's a large number of dropped laws and decrees.
 
 Let's summarise filtered norms by month and type and seasonally adjust by type.
 
 ```{r}
-per_month <- pruned_data %>% group_by(Month, Type) %>% summarise(Count=n()) %>% arrange(Type)
+per_month <- pruned_data %>%
+  group_by(Month, Type) %>%
+  summarise(Count = n()) %>%
+  arrange(Type)
 unique_date_type <- unique(data[, c("Month", "Type")])
 per_month <- left_join(unique_date_type, per_month, by = c("Month", "Type")) %>% mutate(Component = "Observed")
 
-decomp <- sapply(c("Law", "Decree"), function(x)
-  {decomp_proc <- per_month %>% filter(Type == x) %>% select(Count) %>% 
-    ts(start=c(1985, 1), frequency=12) %>% seas(x11="", na.action=na.x13)
-  decomp_seas <- final(decomp_proc) %>% ifelse(.<0, 0, .)
-  decomp_trend <- trend(decomp_proc) %>% ifelse(.<0, 0, .)
-  list(decomp_seas, decomp_trend)}
-  )
+decomp <- sapply(c("Law", "Decree"), function(x) {
+  decomp_proc <- per_month %>%
+    filter(Type == x) %>%
+    select(Count) %>%
+    ts(start = c(1985, 1), frequency = 12) %>%
+    seas(x11 = "", na.action = na.x13)
+  decomp_seas <- final(decomp_proc) %>% ifelse(. < 0, 0, .)
+  decomp_trend <- trend(decomp_proc) %>% ifelse(. < 0, 0, .)
+  list(decomp_seas, decomp_trend)
+})
 
-decomp_df <- rbind.data.frame(decomp[1:4]) %>% mutate(Month = unique(per_month[, "Month"])) %>% 
-  `colnames<-` (c("Law Seas", "Law Trend", "Decree Seas", "Decree Trend", "Month")) %>%
+decomp_df <- rbind.data.frame(decomp[1:4]) %>%
+  mutate(Month = unique(per_month[, "Month"])) %>%
+  `colnames<-`(c("Law Seas", "Law Trend", "Decree Seas", "Decree Trend", "Month")) %>%
   gather(Component, Count, -Month)
-decomp_df <- decomp_df %>% mutate(rown=row_number()) %>% mutate(Type=ifelse(rown<=nrow(decomp_df)/2, "Law", "Decree")) %>% select(-rown)
+decomp_df <- decomp_df %>%
+  mutate(rown = row_number()) %>%
+  mutate(Type = ifelse(rown <= nrow(decomp_df) / 2, "Law", "Decree")) %>%
+  select(-rown)
 decomp_df$Component <- str_remove(decomp_df$Component, "Law[:blank:]|Decree[:blank:]")
 
-per_month_seas <- rbind.data.frame(per_month, decomp_df, stringsAsFactors=FALSE)
+per_month_seas <- rbind.data.frame(per_month, decomp_df, stringsAsFactors = FALSE)
 ```
 
 Let's plot the results!
 
 ```{r}
-ggplot(per_month_seas %>% filter(Component %in% c("Observed", "Trend") & Month >= "1985-03-01"),
-       aes(x=Month, y=Count, colour=Component)) + geom_line() +
-  labs(title="Decretos y leyes en Uruguay, 1985-2019", subtitle="Series simples y tendenciales", y="Conteo", x="") +
-  scale_color_discrete(name = "Tipo", labels=c("Simple", "Tendencia")) +
-  theme(legend.position="bottom") + facet_wrap(~Type,scales="free_y")
+ggplot(
+  per_month_seas %>% filter(Component %in% c("Observed", "Trend") & Month >= "1985-03-01") %>% mutate(LSize = ifelse(Component == "Observed", 0.2, 1)),
+  aes(x = Month, y = Count, colour = Component, size = LSize)
+) + geom_line() +
+  labs(title = "Decretos y leyes en Uruguay, 1985-2019", subtitle = "Series simples y tendenciales, depurado", y = "Conteo", x = "") +
+  scale_color_discrete(name = "Tipo", labels = c("Simple", "Tendencia")) +
+  theme(legend.position = "bottom") + facet_wrap(~Type, scales = "free_y") +
+  scale_size(range = c(0.2, 1), guide="none")
 ```
 
+Let's take a closer look at the trend component.
+
+```{r}
+ggplot(
+  per_month_seas %>% filter(Component == "Trend" & Month >= "1985-03-01"),
+  aes(x = Month, y = Count, colour = "red")
+) + geom_line() +
+  labs(title = "Decretos y leyes en Uruguay, 1985-2019", subtitle = "Series tendenciales, depurado", y = "Conteo", x = "") +
+  scale_y_continuous(limits = c(0,NA)) +
+  theme(legend.position = "bottom") + facet_wrap(~Type, scales = "free_y")
+```
+
+How do the different terms compare with each other?
+
+```{r}
+per_month_seas <- per_month_seas %>%
+  mutate(
+    Term =
+      case_when(
+        Month < as.Date("1990-03-01") ~ "1985-03-01",
+        Month < as.Date("1995-03-01") & Month >= as.Date("1990-03-01") ~ "1990-03-01",
+        Month < as.Date("2000-03-01") & Month >= as.Date("1995-03-01") ~ "1995-03-01",
+        Month < as.Date("2005-03-01") & Month >= as.Date("2000-03-01") ~ "2000-03-01",
+        Month < as.Date("2010-03-01") & Month >= as.Date("2005-03-01") ~ "2005-03-01",
+        Month < as.Date("2015-03-01") & Month >= as.Date("2010-03-01") ~ "2010-03-01",
+        Month < as.Date("2020-03-01") & Month >= as.Date("2015-03-01") ~ "2015-03-01"
+      )
+  )
+per_month_seas$Count[is.na(per_month_seas$Count)] <- 0
+per_month_seas_cum <- per_month_seas %>%
+  group_by(Type, Component, Term) %>%
+  filter(Month >= as.Date("1985-03-01")) %>%
+  mutate(Cumulative = cumsum(Count)) %>%
+  mutate(Time = Month - as.Date(Term))
+
+ggplot(
+  per_month_seas_cum %>% filter(Component %in% c("Observed") & Month >= "1985-03-01"),
+  aes(x = Time, y = Cumulative, colour = Term)
+) + geom_line() +
+  labs(title = "Decretos y leyes en Uruguay, 1985-2019, por legislatura", subtitle = "Series observadas acumuladas, depurado", y = "Conteo acumulado", x = "Días desde el comienzo de la legislatura") +
+  scale_color_discrete(name = "Legislatura", label = c("1985-90", "1990-95", "1995-00", "2000-05", "2005-10", "2010-15", "2015-20")) +
+  theme(legend.position = "bottom") + facet_wrap(~Type, scales = "free_y")
+```
